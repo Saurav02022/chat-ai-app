@@ -29,7 +29,7 @@ This is a simple AI chat application built with **Next.js**, **TypeScript**, and
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/yourusername/ai-chat-app.git
+    git clone https://github.com/Saurav02022/chat-ai-app.git
     cd ai-chat-app
     ```
 
@@ -52,21 +52,3 @@ This is a simple AI chat application built with **Next.js**, **TypeScript**, and
     ```
 
     The app will be available at `http://localhost:3000`.
-
-## Folder Structure
-
-```bash
-/ai-chat-app
-│
-├── /app                      # Next.js app directory
-│   ├── /components            # Reusable components (Message, Chat)
-│   ├── /page.tsx              # Main chat page
-│   └── /styles                # Tailwind CSS custom styles
-│
-├── /api
-│   ├── /chat.ts               # API handler for chat requests
-│
-├── .env.local                 # Local environment variables
-├── tailwind.config.js         # Tailwind CSS configuration
-├── next.config.js             # Next.js configuration
-└── package.json               # Project dependencies and scripts
