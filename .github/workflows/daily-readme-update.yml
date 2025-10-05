@@ -1,0 +1,75 @@
+name: Daily README Update
+
+on:
+  # Scheduled trigger - runs daily at 9:00 AM UTC
+  schedule:
+    - cron: '0 9 * * *'
+  
+  # Manual trigger - allows manual execution from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Set up Git configuration
+        run: |
+          git config --local user.email "sk729584@gmail.com"
+          git config --local user.name "Saurav02022"
+          
+      - name: Update README with current date and time
+        run: |
+          # Get current date and time in IST (India Standard Time)
+          CURRENT_DATETIME=$(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M:%S IST')
+          
+          # Check if the auto-update section exists in README.md
+          if grep -q "<!-- AUTO-UPDATE-START -->" README.md; then
+            # Update existing section
+            sed -i "/<!-- AUTO-UPDATE-START -->/,/<!-- AUTO-UPDATE-END -->/c\\
+          <!-- AUTO-UPDATE-START -->\\
+          **Last Updated:** $CURRENT_DATETIME\\
+          \\
+          *This section is automatically updated daily at 9:00 AM IST by GitHub Actions.*\\
+          <!-- AUTO-UPDATE-END -->" README.md
+          else
+            # Add new section at the end of README.md
+            echo "" >> README.md
+            echo "---" >> README.md
+            echo "" >> README.md
+            echo "<!-- AUTO-UPDATE-START -->" >> README.md
+            echo "**Last Updated:** $CURRENT_DATETIME" >> README.md
+            echo "" >> README.md
+            echo "*This section is automatically updated daily at 9:00 AM IST by GitHub Actions.*" >> README.md
+            echo "<!-- AUTO-UPDATE-END -->" >> README.md
+          fi
+          
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git add README.md
+          git commit -m "chore: Auto-update README with current timestamp
+          
+          - Updated by GitHub Actions daily workflow
+          - Timestamp: $(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M:%S IST')
+          - Trigger: ${{ github.event_name }}"
+          git push
+          
+      - name: No changes detected
+        if: steps.check_changes.outputs.changes == 'false'
+        run: |
+          echo "No changes detected in README.md. Skipping commit."
