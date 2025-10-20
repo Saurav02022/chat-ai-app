@@ -1,7 +1,7 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/lib/stores/authStore';
+import { PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/routes';
 
 interface LoginModalProps {
   open: boolean;
@@ -22,41 +24,39 @@ interface LoginModalProps {
 export function LoginModal({ open, onOpenChange }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
+  const { login } = useAuthStore();
 
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
 
-      // For UI development - simulate successful login
-      if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-        // Simulate loading time
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Simulate loading time for better UX
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        toast({
-          title: 'Demo Mode',
-          description: 'Authentication is in demo mode. Modal will close...',
-        });
-        onOpenChange(false);
-        return;
-      }
+      // Create mock user data
+      const mockUser = {
+        id: 'mock-user-' + Date.now(),
+        email: 'demo@jobcraft.ai',
+        name: 'Demo User',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
+        createdAt: new Date().toISOString(),
+      };
 
-      const result = await signIn('google', {
-        redirect: false,
+      // Login using auth store
+      login(mockUser);
+
+      toast({
+        title: 'Welcome to JobCraft AI!',
+        description: 'Redirecting to your dashboard...',
       });
 
-      if (result?.error) {
-        toast({
-          title: 'Authentication Error',
-          description: 'Failed to sign in with Google. Please try again.',
-          variant: 'destructive',
-        });
-      } else if (result?.ok) {
-        toast({
-          title: 'Success!',
-          description: 'Successfully signed in. Welcome!',
-        });
-        onOpenChange(false);
-      }
+      onOpenChange(false);
+
+      // Redirect to dashboard after a short delay
+      setTimeout(() => {
+        router.push(PROTECTED_ROUTES.DASHBOARD);
+      }, 500);
     } catch (error) {
       toast({
         title: 'Error',
@@ -107,6 +107,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               disabled={isLoading}
               size="lg"
               className="w-full flex items-center justify-center gap-3 py-4 text-base font-medium bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
+              aria-label="Sign in with Google"
             >
               {isLoading ? (
                 <svg
@@ -179,7 +180,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
         >
           By continuing, you agree to our{' '}
           <a
-            href="/terms"
+            href={PUBLIC_ROUTES.TERMS}
             className="underline hover:text-foreground transition-colors"
             target="_blank"
             rel="noopener noreferrer"
@@ -188,7 +189,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           </a>{' '}
           and{' '}
           <a
-            href="/privacy"
+            href={PUBLIC_ROUTES.PRIVACY}
             className="underline hover:text-foreground transition-colors"
             target="_blank"
             rel="noopener noreferrer"

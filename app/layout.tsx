@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { Providers } from '@/components/Providers';
+import { ConditionalLayout } from '@/components/ConditionalLayout';
 import { Toaster } from '@/components/ui/toaster';
 
 const geistSans = localFont({
@@ -34,7 +35,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {children}
+          <ConditionalLayout>{children}</ConditionalLayout>
           <Toaster />
         </Providers>
         <SpeedInsights />

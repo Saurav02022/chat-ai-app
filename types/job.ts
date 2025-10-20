@@ -29,6 +29,8 @@ export interface Job {
   jobUrl?: string;
   resumeUsed?: string;
   coverLetterUsed?: string;
+  resumeFileId?: string; // Reference to uploaded resume file
+  resumeUploadedAt?: string; // When resume was uploaded
 }
 
 export interface JobFilters {
@@ -61,6 +63,10 @@ export interface JobActions {
 
   // Job status management
   updateJobStatus: (id: string, status: JobStatus) => void;
+
+  // Resume management
+  attachResumeToJob: (jobId: string, fileId: string) => void;
+  removeResumeFromJob: (jobId: string) => void;
 
   // Filtering and search
   setFilters: (filters: Partial<JobFilters>) => void;

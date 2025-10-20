@@ -98,6 +98,37 @@ export const useJobStore = create<JobStore>()(
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
 
+      // Resume management
+      attachResumeToJob: (jobId: string, fileId: string) =>
+        set((state) => ({
+          jobs: state.jobs.map((job) =>
+            job.id === jobId
+              ? {
+                  ...job,
+                  resumeFileId: fileId,
+                  resumeUploadedAt: new Date().toISOString(),
+                  lastUpdated: new Date(),
+                }
+              : job
+          ),
+          error: null,
+        })),
+
+      removeResumeFromJob: (jobId: string) =>
+        set((state) => ({
+          jobs: state.jobs.map((job) =>
+            job.id === jobId
+              ? {
+                  ...job,
+                  resumeFileId: undefined,
+                  resumeUploadedAt: undefined,
+                  lastUpdated: new Date(),
+                }
+              : job
+          ),
+          error: null,
+        })),
+
       // Utility
       reset: () => set(initialState),
     }),

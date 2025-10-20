@@ -2,8 +2,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  image?: string;
-  provider: 'google';
+  avatar?: string;
+  createdAt: string;
 }
 
 export interface AuthState {

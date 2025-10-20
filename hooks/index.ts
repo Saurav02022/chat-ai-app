@@ -1,1 +1,1 @@
-// Custom React hooks will be added here when needed
+export { useToast, toast } from './use-toast';
