@@ -47,6 +47,32 @@ interface JobTimelineProps {
 }
 
 export function JobTimeline({ job }: JobTimelineProps) {
+  // Helper functions (moved before useMemo to avoid hoisting issues)
+  const formatStatus = (status: string) => {
+    return status.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'applied':
+        return Plus;
+      case 'reviewing':
+        return Clock;
+      case 'phone-screen':
+        return Phone;
+      case 'interview':
+        return Users;
+      case 'offer':
+        return CheckCircle;
+      case 'rejected':
+        return XCircle;
+      case 'withdrawn':
+        return XCircle;
+      default:
+        return Clock;
+    }
+  };
+
   const timelineEvents = useMemo(() => {
     const events: TimelineEvent[] = [];
 
@@ -127,31 +153,6 @@ export function JobTimeline({ job }: JobTimelineProps) {
     // Sort events by timestamp (newest first)
     return events.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }, [job]);
-
-  const formatStatus = (status: string) => {
-    return status.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'applied':
-        return Plus;
-      case 'reviewing':
-        return Clock;
-      case 'phone-screen':
-        return Phone;
-      case 'interview':
-        return Users;
-      case 'offer':
-        return CheckCircle;
-      case 'rejected':
-        return XCircle;
-      case 'withdrawn':
-        return XCircle;
-      default:
-        return Clock;
-    }
-  };
 
   if (timelineEvents.length === 0) {
     return (

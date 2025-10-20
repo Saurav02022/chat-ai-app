@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useJobStore } from '@/lib/stores/jobStore';
 import { JobHeader } from '@/components/jobs/JobHeader';
 import { JobOverviewTab } from '@/components/jobs/JobOverviewTab';
+import { ResumeReviewTab } from '@/components/jobs/ResumeReviewTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -137,17 +138,7 @@ function JobDetailsContent() {
           </TabsContent>
 
           <TabsContent value="resume" className="mt-6">
-            <Card>
-              <CardContent className="text-center py-12">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Resume Review
-                </h3>
-                <p className="text-gray-600">
-                  Resume review functionality will be implemented in a future
-                  update.
-                </p>
-              </CardContent>
-            </Card>
+            <ResumeReviewTab job={job} />
           </TabsContent>
 
           <TabsContent value="templates" className="mt-6">
