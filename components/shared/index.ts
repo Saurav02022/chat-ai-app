@@ -1,1 +1,2 @@
-// Components will be exported from here when created
+export { FileUpload } from './FileUpload';
+export { ResumePreview } from './ResumePreview';

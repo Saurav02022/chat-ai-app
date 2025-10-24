@@ -1,11 +1,12 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/lib/stores/authStore';
+import { PUBLIC_ROUTES } from '@/lib/routes';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -13,16 +14,16 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const { data: session, status } = useSession();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
+    if (!isLoading && !isAuthenticated) {
+      router.push(PUBLIC_ROUTES.HOME);
     }
-  }, [status, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  if (status === 'loading') {
+  if (isLoading) {
     return (
       fallback || (
         <div className="container py-8">
@@ -41,30 +42,14 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
     );
   }
 
-  if (status === 'unauthenticated') {
+  if (!isAuthenticated) {
     return (
       <div className="container py-8">
         <Alert>
           <AlertDescription>
-            You need to be signed in to access this page. Redirecting to
-            login...
+            You need to be signed in to access this page. Redirecting to home...
           </AlertDescription>
         </Alert>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="container py-8">
-        <Alert>
-          <AlertDescription>
-            Authentication error. Please try signing in again.
-          </AlertDescription>
-        </Alert>
-        <Button onClick={() => router.push('/login')} className="mt-4">
-          Go to Login
-        </Button>
       </div>
     );
   }

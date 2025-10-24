@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Job, JobState, JobStore, JobFilters } from '@/types/job';
+import type {
+  Job,
+  JobState,
+  JobStore,
+  JobFilters,
+  ATSAnalysisResult,
+  CompanyInsights,
+  AnalysisHistory,
+} from '@/types/job';
 
 const initialState: JobState = {
   jobs: [],
@@ -97,6 +105,95 @@ export const useJobStore = create<JobStore>()(
       // Loading and error states
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
+
+      // Resume management
+      attachResumeToJob: (jobId: string, fileId: string) =>
+        set((state) => ({
+          jobs: state.jobs.map((job) =>
+            job.id === jobId
+              ? {
+                  ...job,
+                  resumeFileId: fileId,
+                  resumeUploadedAt: new Date().toISOString(),
+                  lastUpdated: new Date(),
+                }
+              : job
+          ),
+          error: null,
+        })),
+
+      removeResumeFromJob: (jobId: string) =>
+        set((state) => ({
+          jobs: state.jobs.map((job) =>
+            job.id === jobId
+              ? {
+                  ...job,
+                  resumeFileId: undefined,
+                  resumeUploadedAt: undefined,
+                  lastUpdated: new Date(),
+                }
+              : job
+          ),
+          error: null,
+        })),
+
+      // Analysis management
+      saveAnalysisResult: (
+        jobId: string,
+        analysis: ATSAnalysisResult,
+        insights?: CompanyInsights
+      ) =>
+        set((state) => ({
+          jobs: state.jobs.map((job) => {
+            if (job.id === jobId) {
+              const historyEntry: AnalysisHistory = {
+                id: `analysis_${Date.now()}`,
+                analysisDate: new Date().toISOString(),
+                atsResult: analysis,
+                companyInsights: insights,
+                resumeFileId: job.resumeFileId || '',
+                jobDescriptionHash: btoa(job.description || '').substring(
+                  0,
+                  16
+                ),
+              };
+
+              return {
+                ...job,
+                currentAnalysis: analysis,
+                companyInsights: insights,
+                analysisHistory: [
+                  historyEntry,
+                  ...(job.analysisHistory || []),
+                ].slice(0, 10), // Keep last 10 analyses
+                lastUpdated: new Date(),
+              };
+            }
+            return job;
+          }),
+          error: null,
+        })),
+
+      getAnalysisHistory: (jobId: string) => {
+        const job = get().jobs.find((j) => j.id === jobId);
+        return job?.analysisHistory || [];
+      },
+
+      clearAnalysisHistory: (jobId: string) =>
+        set((state) => ({
+          jobs: state.jobs.map((job) =>
+            job.id === jobId
+              ? {
+                  ...job,
+                  currentAnalysis: undefined,
+                  companyInsights: undefined,
+                  analysisHistory: [],
+                  lastUpdated: new Date(),
+                }
+              : job
+          ),
+          error: null,
+        })),
 
       // Utility
       reset: () => set(initialState),

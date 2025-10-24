@@ -1,7 +1,6 @@
 'use client';
 
 import { ComingSoon } from '@/components/ComingSoon';
-import { AuthGuard } from '@/components/AuthGuard';
 
 function SettingsContent() {
   return (
@@ -25,9 +24,6 @@ function SettingsContent() {
 }
 
 export default function SettingsPage() {
-  return (
-    <AuthGuard>
-      <SettingsContent />
-    </AuthGuard>
-  );
+  // TODO: Add AuthGuard wrapper for authentication protection
+  return <SettingsContent />;
 }

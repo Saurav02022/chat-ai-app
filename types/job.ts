@@ -10,6 +10,41 @@ export type JobStatus =
 
 export type JobType = 'full-time' | 'part-time' | 'contract' | 'internship';
 
+// Analysis result types
+export interface ATSAnalysisResult {
+  overall_score: number;
+  keyword_match: number;
+  format_score: number;
+  content_quality: number;
+  experience_match: number;
+  skills_alignment: number;
+  strengths: string[];
+  improvements: string[];
+  missing_keywords: string[];
+  analysis_metadata: {
+    processing_time: number;
+    word_count: number;
+    ai_model_used: string;
+    confidence_level: 'high' | 'medium' | 'low';
+  };
+}
+
+export interface CompanyInsights {
+  company_values: string[];
+  cultural_fit_tips: string[];
+  success_factors: string[];
+  competitive_advantages: string[];
+}
+
+export interface AnalysisHistory {
+  id: string;
+  analysisDate: string;
+  atsResult: ATSAnalysisResult;
+  companyInsights?: CompanyInsights;
+  resumeFileId: string;
+  jobDescriptionHash: string; // To detect if job description changed
+}
+
 export interface Job {
   id: string;
   userId: string;
@@ -29,6 +64,12 @@ export interface Job {
   jobUrl?: string;
   resumeUsed?: string;
   coverLetterUsed?: string;
+  resumeFileId?: string; // Reference to uploaded resume file
+  resumeUploadedAt?: string; // When resume was uploaded
+  // Analysis results
+  currentAnalysis?: ATSAnalysisResult;
+  companyInsights?: CompanyInsights;
+  analysisHistory?: AnalysisHistory[];
 }
 
 export interface JobFilters {
@@ -61,6 +102,19 @@ export interface JobActions {
 
   // Job status management
   updateJobStatus: (id: string, status: JobStatus) => void;
+
+  // Resume management
+  attachResumeToJob: (jobId: string, fileId: string) => void;
+  removeResumeFromJob: (jobId: string) => void;
+
+  // Analysis management
+  saveAnalysisResult: (
+    jobId: string,
+    analysis: ATSAnalysisResult,
+    insights?: CompanyInsights
+  ) => void;
+  getAnalysisHistory: (jobId: string) => AnalysisHistory[];
+  clearAnalysisHistory: (jobId: string) => void;
 
   // Filtering and search
   setFilters: (filters: Partial<JobFilters>) => void;
