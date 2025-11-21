@@ -36,7 +36,7 @@ Migrate to Supabase for production-ready database, auth, and file storage.
 
 ### Week 2: AI Features & Resume Analysis (Days 8-14)
 
-- **Day 8**: OpenAI integration setup
+- **Day 8**: Google Gemini integration setup
 - **Day 9**: ATS scoring system
 - **Day 10**: Resume review interface
 - **Day 11**: Resume template system
@@ -94,7 +94,7 @@ Each day's plan includes:
 - [Day 5: Individual Job Pages](./day-05/README.md)
 - [Day 6: Resume Upload](./day-06/README.md)
 - [Day 7: Week 1 Testing](./day-07/README.md)
-- [Day 8: OpenAI Integration](./day-08/README.md)
+- [Day 8: Google Gemini Integration](./day-08/README.md)
 - [Day 9: ATS Scoring](./day-09/README.md)
 - [Day 10: Resume Review](./day-10/README.md)
 - [Day 11: Resume Templates](./day-11/README.md)
@@ -122,7 +122,7 @@ Each day's plan includes:
 - **Language**: TypeScript 5
 - **Styling**: Tailwind CSS + Shadcn UI
 - **State**: Zustand + TanStack Query
-- **AI**: OpenAI GPT-4
+- **AI**: Google Gemini GPT-4
 - **Backend**: Supabase (Phase 2)
 
 ### Key Libraries
@@ -182,7 +182,7 @@ Each day's plan includes:
 
 ## Getting Help
 
-- **Documentation**: Check Next.js, Shadcn UI, and OpenAI docs
+- **Documentation**: Check Next.js, Shadcn UI, and Google Gemini docs
 - **AI Assistant**: Use Cursor AI for code help
 - **Community**: Next.js Discord, Reddit r/nextjs
 - **Issues**: Track blockers and questions as you go

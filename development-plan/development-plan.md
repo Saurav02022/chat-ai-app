@@ -6,7 +6,7 @@ Build a complete AI-powered job search platform with resume optimization, ATS sc
 
 **Timeline**: 20 days (~3-4 weeks)
 **Daily Commitment**: 2-3 hours (weekdays after 7 PM), full day (weekends)
-**Tech Stack**: Next.js 15, TypeScript, Tailwind CSS, Shadcn UI, Zustand, TanStack Query, Supabase (later), OpenAI
+**Tech Stack**: Next.js 15, TypeScript, Tailwind CSS, Shadcn UI, Zustand, TanStack Query, Supabase (later), Google Gemini
 
 ---
 
@@ -162,13 +162,13 @@ Build a complete AI-powered job search platform with resume optimization, ATS sc
 
 ## Week 2: AI Features & Resume Analysis (Days 8-14)
 
-### Day 8 (Weekday - 2-3 hours): OpenAI Integration Setup
+### Day 8 (Weekday - 2-3 hours): Gemini AI Integration Setup
 
 **Goal**: Set up AI integration for resume analysis
 
 **Tasks**:
 
-- Configure OpenAI API client
+- Configure Google Gemini API client
 - Create AI utility functions in `lib/ai.ts`
 - Build resume text extraction from PDF (use pdf-parse)
 - Create job description parser
@@ -177,7 +177,7 @@ Build a complete AI-powered job search platform with resume optimization, ATS sc
 
 **Deliverables**:
 
-- Working OpenAI integration
+- Working Gemini AI integration
 - PDF text extraction
 - Keyword extraction
 
@@ -189,7 +189,7 @@ Build a complete AI-powered job search platform with resume optimization, ATS sc
 
 **Tasks**:
 
-- Create ATS scoring algorithm using OpenAI
+- Create ATS scoring algorithm using Gemini AI
 - Build scoring breakdown by category (keywords, format, content, experience, skills)
 - Implement score visualization components (circular progress, bars)
 - Create strengths and improvements panels
@@ -232,7 +232,7 @@ Build a complete AI-powered job search platform with resume optimization, ATS sc
 
 **Tasks**:
 
-- Create template generation using OpenAI
+- Create template generation using Gemini AI
 - Build template preview component with zoom
 - Generate 3 template variants (Modern, Professional, Company-Optimized)
 - Implement LaTeX code generation
@@ -366,7 +366,7 @@ Build a complete AI-powered job search platform with resume optimization, ATS sc
 - Implement microphone permission handling
 - Build audio level monitoring
 - Create audio quality indicator
-- Implement speech-to-text using Web Speech API or OpenAI Whisper
+- Implement speech-to-text using Web Speech API or Gemini
 - Build audio testing component
 - Add noise filtering and audio optimization
 

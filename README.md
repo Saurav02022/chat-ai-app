@@ -44,7 +44,7 @@ JobCraft AI is a comprehensive platform that helps job seekers land their dream 
 - **Styling:** Tailwind CSS + Shadcn UI
 - **State:** Zustand + TanStack Query
 - **Database:** Supabase (PostgreSQL)
-- **AI:** OpenAI (GPT-4, Whisper)
+- **AI:** Google Gemini (Gemini Pro)
 - **Deployment:** Vercel
 
 ## Getting Started
@@ -53,7 +53,7 @@ JobCraft AI is a comprehensive platform that helps job seekers land their dream 
 
 - Node.js 18+
 - npm or yarn
-- OpenAI API key
+- Google Gemini API key
 
 ### Installation
 
@@ -79,8 +79,8 @@ cp .env.example .env.local
 Add your credentials to `.env.local`:
 
 ```env
-# OpenAI
-OPENAI_API_KEY=your-openai-api-key
+# Google Gemini
+GEMINI_API_KEY=your-gemini-api-key
 
 # Supabase (optional for Phase 1)
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
@@ -181,11 +181,11 @@ npm run type-check   # Run TypeScript compiler check
 
 ## Environment Variables
 
-| Variable                        | Description                    | Required |
-| ------------------------------- | ------------------------------ | -------- |
-| `OPENAI_API_KEY`                | OpenAI API key for AI features | Yes      |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL           | Phase 2  |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key         | Phase 2  |
+| Variable                        | Description                  | Required |
+| ------------------------------- | ---------------------------- | -------- |
+| `GEMINI_API_KEY`                | Google Gemini API key for AI | Yes      |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL         | Phase 2  |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key       | Phase 2  |
 
 ## Contributing
 
@@ -213,11 +213,11 @@ This is currently a solo project under active development. Contributions welcome
 └─────────────────────────────────────────────┘
            │                    │
            ▼                    ▼
-    ┌──────────┐         ┌─────────────┐
-    │  OpenAI  │         │  Supabase   │
-    │  GPT-4   │         │ (PostgreSQL)│
-    │  Whisper │         │  + Storage  │
-    └──────────┘         └─────────────┘
+    ┌──────────────┐     ┌─────────────┐
+    │ Google Gemini│     │  Supabase   │
+    │  Gemini Pro  │     │ (PostgreSQL)│
+    │              │     │  + Storage  │
+    └──────────────┘     └─────────────┘
 ```
 
 ### Architecture Principles
@@ -247,11 +247,11 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-**OpenAI API errors**
+**Gemini API errors**
 
-- Verify your `OPENAI_API_KEY` is set in `.env.local`
-- Check API key has sufficient credits
-- Ensure key starts with `sk-`
+- Verify your `GEMINI_API_KEY` is set in `.env.local`
+- Check API key has proper permissions
+- Get your API key from https://makersuite.google.com/app/apikey
 
 **Build failures**
 
@@ -274,7 +274,7 @@ npm run lint
 A: No, Phase 1 (Days 1-20) uses localStorage. Supabase is only needed for Phase 2.
 
 **Q: Can I use a different AI provider?**  
-A: Currently OpenAI is required. Support for alternative providers (Anthropic, etc.) is planned.
+A: Currently Google Gemini is used for all AI features. It's cost-effective and powerful for resume analysis and text processing.
 
 **Q: Is the interview assistant visible to interviewers?**  
 A: No, it's designed to be invisible with stealth mode and panic buttons for safety.

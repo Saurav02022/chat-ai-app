@@ -140,7 +140,7 @@ Migrate to production-ready backend:
    cp .env.example .env.local
    ```
 
-   Add your OpenAI API key to `.env.local`
+   Add your Google Gemini API key to `.env.local`
 
 4. **Test Development Server**
 
@@ -175,7 +175,7 @@ Migrate to production-ready backend:
 
 ### Advanced (Learn for Specific Features)
 
-- **OpenAI API**: AI integration
+- **Google Gemini API**: AI integration
 - **Web Audio API**: Audio processing
 - **Web Speech API**: Speech recognition
 - **Supabase**: Backend services
@@ -217,7 +217,7 @@ Migrate to production-ready backend:
 
 1. **Check the Day's README**: Look for tips and solutions
 2. **Review Previous Days**: Similar problems may have been solved
-3. **Check Documentation**: Next.js, Shadcn UI, OpenAI docs
+3. **Check Documentation**: Next.js, Shadcn UI, Google Gemini docs
 4. **Use Cursor AI**: Ask for help with specific issues
 5. **Search Online**: Stack Overflow, GitHub issues
 6. **Take a Break**: Sometimes stepping away helps
@@ -228,7 +228,7 @@ Migrate to production-ready backend:
 - **Shadcn UI**: https://ui.shadcn.com
 - **Tailwind CSS**: https://tailwindcss.com/docs
 - **TypeScript**: https://www.typescriptlang.org/docs
-- **OpenAI API**: https://platform.openai.com/docs
+- **Google Gemini API**: https://ai.google.dev/docs
 - **Supabase**: https://supabase.com/docs
 
 ## Progress Tracking

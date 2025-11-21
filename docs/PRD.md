@@ -298,7 +298,7 @@ We're the only platform combining all three:
 - **Frontend:** Next.js 15, TypeScript, Tailwind CSS, Shadcn UI
 - **State:** Zustand (client), TanStack Query (server)
 - **Database:** Supabase (PostgreSQL)
-- **AI:** OpenAI (GPT-4, Whisper)
+- **AI:** Google Gemini (Gemini Pro)
 - **Deployment:** Vercel
 
 ### Performance
@@ -427,7 +427,7 @@ Interview Page
 
 **Week 2: AI Features**
 
-- [ ] Day 8: OpenAI integration
+- [ ] Day 8: Gemini AI integration
 - [x] Day 9: ATS scoring ✅
 - [x] Day 10: Resume analysis UI ✅
 - [ ] Day 11-12: Templates
@@ -460,9 +460,9 @@ Interview Page
 
 ### High Priority
 
-**OpenAI API Costs**
+**Gemini API Costs**
 
-- Risk: High usage → unsustainable costs
+- Risk: High usage → unsustainable costs (though Gemini is cost-effective)
 - Mitigation: Cache responses, implement usage limits, monitor daily
 
 **Interview Assistant Detection**
@@ -503,7 +503,7 @@ Interview Page
 
 **Technical Assumptions:**
 
-1. OpenAI API remains stable and affordable (current: $0.002/1K tokens)
+1. Google Gemini API remains stable and affordable
 2. Supabase free tier sufficient for initial users (<500MB data, 1GB storage)
 3. Web Audio API and Speech API supported in target browsers
 4. Vercel free tier handles initial traffic (100GB/month bandwidth)
@@ -528,28 +528,28 @@ Interview Page
 
 **Critical (Blockers if unavailable):**
 
-| Dependency   | Purpose                                | Risk   | Mitigation                                              |
-| ------------ | -------------------------------------- | ------ | ------------------------------------------------------- |
-| OpenAI API   | Resume analysis, interview suggestions | High   | Cache responses, implement fallbacks, budget monitoring |
-| Supabase     | Database, auth, storage                | High   | Have migration plan to self-hosted PostgreSQL           |
-| Vercel       | Hosting and deployment                 | Medium | Can migrate to AWS/Netlify if needed                    |
-| Google OAuth | User authentication                    | Medium | Add email/password auth as backup                       |
+| Dependency        | Purpose                                | Risk   | Mitigation                                              |
+| ----------------- | -------------------------------------- | ------ | ------------------------------------------------------- |
+| Google Gemini API | Resume analysis, interview suggestions | High   | Cache responses, implement fallbacks, budget monitoring |
+| Supabase          | Database, auth, storage                | High   | Have migration plan to self-hosted PostgreSQL           |
+| Vercel            | Hosting and deployment                 | Medium | Can migrate to AWS/Netlify if needed                    |
+| Google OAuth      | User authentication                    | Medium | Add email/password auth as backup                       |
 
 **Important (Degraded experience):**
 
 | Dependency          | Purpose           | Risk   | Mitigation                            |
 | ------------------- | ----------------- | ------ | ------------------------------------- |
 | Web Audio API       | Audio capture     | Low    | Feature detection, clear requirements |
-| Web Speech API      | Speech-to-text    | Medium | Fallback to OpenAI Whisper            |
+| Web Speech API      | Speech-to-text    | Medium | Use Gemini for text processing        |
 | Browser Permissions | Microphone access | Low    | Clear instructions, help docs         |
 
 **Budget Dependencies:**
 
-- OpenAI API: ~$100-500/month (estimated, scales with usage)
+- Google Gemini API: ~$50-200/month (estimated, cost-effective pricing)
 - Supabase: $0-25/month (free tier initially, scale as needed)
 - Vercel: $0-20/month (free tier initially)
 - Domain: ~$12/year
-- **Total: ~$0-550/month initially, scaling to $1000+ with growth**
+- **Total: ~$0-250/month initially, scaling to $500+ with growth**
 
 ---
 
