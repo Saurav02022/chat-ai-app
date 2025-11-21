@@ -1,6 +1,6 @@
 'use client';
 
-import { Briefcase, Calendar, TrendingUp, Target } from 'lucide-react';
+import { Briefcase, Calendar, Clock, Gift } from 'lucide-react';
 import { StatsCard } from './StatsCard';
 import { useJobStore } from '@/lib/stores/jobStore';
 import { useMemo } from 'react';
@@ -9,15 +9,16 @@ export function DashboardStats() {
   const { jobs } = useJobStore();
 
   const stats = useMemo(() => {
-    // Calculate job stats directly from jobs array
+    // Calculate job stats directly from jobs array (REAL data, no fake trends)
     const jobStats = {
       total: jobs.length,
-      applied: jobs.filter((job) => job.status === 'applied').length,
       interviewing: jobs.filter((job) =>
         ['phone-screen', 'interview'].includes(job.status)
       ).length,
+      pending: jobs.filter((job) =>
+        ['applied', 'reviewing'].includes(job.status)
+      ).length,
       offers: jobs.filter((job) => job.status === 'offer').length,
-      rejected: jobs.filter((job) => job.status === 'rejected').length,
     };
 
     const thisMonth = new Date().getMonth();
@@ -32,47 +33,22 @@ export function DashboardStats() {
       );
     });
 
-    // Calculate success rate (offers / total applications)
-    // Show "—" when no data available (better UX than 0%)
-    const successRate =
-      jobStats.total > 0
-        ? `${Math.round((jobStats.offers / jobStats.total) * 100)}%`
-        : '—';
-
-    // Calculate interview rate (interviews / total applications)
-    const interviewRate =
-      jobStats.total > 0
-        ? `${Math.round((jobStats.interviewing / jobStats.total) * 100)}%`
-        : '—';
-
-    // Only show trends when there's actual data
-    const hasTrends = jobStats.total > 0;
-
     return {
       totalApplications: {
         value: jobStats.total,
-        thisMonth: thisMonthJobs.length,
-        trend: hasTrends
-          ? { value: 12, label: 'from last month', isPositive: true }
-          : undefined,
+        description: `${thisMonthJobs.length} this month`,
       },
       activeInterviews: {
         value: jobStats.interviewing,
-        trend: hasTrends
-          ? { value: 8, label: 'from last week', isPositive: true }
-          : undefined,
+        description: 'Scheduled and in progress',
       },
-      successRate: {
-        value: successRate,
-        trend: hasTrends
-          ? { value: 5, label: 'from last month', isPositive: true }
-          : undefined,
+      pendingResponses: {
+        value: jobStats.pending,
+        description: 'Awaiting response',
       },
-      interviewRate: {
-        value: interviewRate,
-        trend: hasTrends
-          ? { value: 3, label: 'from last month', isPositive: true }
-          : undefined,
+      offersReceived: {
+        value: jobStats.offers,
+        description: 'Offers in hand',
       },
     };
   }, [jobs]);
@@ -82,30 +58,26 @@ export function DashboardStats() {
       <StatsCard
         title="Total Applications"
         value={stats.totalApplications.value}
-        description={`${stats.totalApplications.thisMonth} this month`}
+        description={stats.totalApplications.description}
         icon={Briefcase}
-        trend={stats.totalApplications.trend}
       />
       <StatsCard
         title="Active Interviews"
         value={stats.activeInterviews.value}
-        description="Scheduled and in progress"
+        description={stats.activeInterviews.description}
         icon={Calendar}
-        trend={stats.activeInterviews.trend}
       />
       <StatsCard
-        title="Success Rate"
-        value={stats.successRate.value}
-        description="Offers received"
-        icon={Target}
-        trend={stats.successRate.trend}
+        title="Pending Responses"
+        value={stats.pendingResponses.value}
+        description={stats.pendingResponses.description}
+        icon={Clock}
       />
       <StatsCard
-        title="Interview Rate"
-        value={stats.interviewRate.value}
-        description="Applications to interviews"
-        icon={TrendingUp}
-        trend={stats.interviewRate.trend}
+        title="Offers Received"
+        value={stats.offersReceived.value}
+        description={stats.offersReceived.description}
+        icon={Gift}
       />
     </div>
   );
