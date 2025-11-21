@@ -69,9 +69,7 @@ export interface ParsedJobDescription {
 
 // AI service types
 export interface AIConnectionStatus {
-  openai: boolean;
   gemini: boolean;
-  preferred: 'openai' | 'gemini';
 }
 
 // Analysis request/response types

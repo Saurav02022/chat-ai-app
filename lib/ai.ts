@@ -1,12 +1,7 @@
-import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { ATSAnalysisResult } from '@/types/ai';
 
-// Initialize AI clients
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
+// Initialize Gemini AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 // Rate limiting and error handling
@@ -50,34 +45,6 @@ export async function processWithGemini(prompt: string): Promise<string> {
   } catch (error) {
     console.error('Gemini API failed:', error);
     throw new Error('Failed to process with Gemini');
-  }
-}
-
-/**
- * Use OpenAI for complex analysis (when needed)
- */
-export async function processWithOpenAI(
-  prompt: string,
-  model: string = 'gpt-3.5-turbo'
-): Promise<string> {
-  try {
-    const response = await withRetry(() =>
-      openai.chat.completions.create({
-        model,
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 2000,
-        temperature: 0.3,
-      })
-    );
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-    return content;
-  } catch (error) {
-    console.error('OpenAI API failed:', error);
-    throw new Error('Failed to process with OpenAI');
   }
 }
 
@@ -291,17 +258,9 @@ Be thorough, realistic, and provide insights that will genuinely help improve th
 `;
 
   try {
-    // Use OpenAI for complex analysis, fallback to Gemini if needed
-    let result: string;
-    let modelUsed = 'gpt-4';
-
-    try {
-      result = await processWithOpenAI(prompt, 'gpt-4');
-    } catch (openaiError) {
-      console.warn('OpenAI failed, falling back to Gemini:', openaiError);
-      result = await processWithGemini(prompt);
-      modelUsed = 'gemini-pro';
-    }
+    // Use Gemini for AI analysis
+    const result = await processWithGemini(prompt);
+    const modelUsed = 'gemini-pro';
 
     const analysis = JSON.parse(result);
     const processingTime = Date.now() - startTime;
@@ -518,25 +477,12 @@ Be specific and actionable based on the job description content.
 }
 
 /**
- * Test AI connections
+ * Test Gemini AI connection
  */
-export async function testAIConnections(): Promise<{
-  openai: boolean;
+export async function testAIConnection(): Promise<{
   gemini: boolean;
-  preferred: 'openai' | 'gemini';
 }> {
-  let openaiWorking = false;
   let geminiWorking = false;
-
-  // Test OpenAI
-  try {
-    if (process.env.OPENAI_API_KEY) {
-      await processWithOpenAI('Hello', 'gpt-3.5-turbo');
-      openaiWorking = true;
-    }
-  } catch (error) {
-    console.error('OpenAI test failed:', error);
-  }
 
   // Test Gemini
   try {
@@ -549,8 +495,6 @@ export async function testAIConnections(): Promise<{
   }
 
   return {
-    openai: openaiWorking,
     gemini: geminiWorking,
-    preferred: geminiWorking ? 'gemini' : 'openai', // Prefer Gemini for cost efficiency
   };
 }

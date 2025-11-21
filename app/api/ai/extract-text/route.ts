@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processWithGemini, processWithOpenAI } from '@/lib/ai';
+import { processWithGemini } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,21 +35,13 @@ PDF Base64 Data: ${fileData.substring(0, 2000)}...
 `;
 
       try {
-        // Try Gemini first (cheaper for text extraction)
+        // Use Gemini for text extraction
         extractedText = await processWithGemini(prompt);
       } catch (geminiError) {
-        console.warn('Gemini extraction failed, trying OpenAI:', geminiError);
-        try {
-          extractedText = await processWithOpenAI(prompt);
-        } catch (openaiError) {
-          console.error(
-            'Both AI services failed for PDF extraction:',
-            openaiError
-          );
-          throw new Error(
-            'Unable to extract text from PDF. Please try a different file format.'
-          );
-        }
+        console.error('Gemini extraction failed:', geminiError);
+        throw new Error(
+          'Unable to extract text from PDF. Please try a different file format.'
+        );
       }
     } else {
       // For other file types, try to decode base64
