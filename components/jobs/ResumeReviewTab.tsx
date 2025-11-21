@@ -61,18 +61,12 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
     attachResumeToJob,
     removeResumeFromJob,
     clearAnalysisHistory,
-    getJob,
   } = useJobStore();
 
-  // Get current job data (reactive to store changes)
-  const currentJob = getJob(job.id) || job;
-
   // Get current resume file
-  const resumeFile = currentJob.resumeFileId
-    ? getFile(currentJob.resumeFileId)
-    : null;
+  const resumeFile = job.resumeFileId ? getFile(job.resumeFileId) : null;
   const hasResume = !!resumeFile;
-  const hasAnalysis = !!currentJob.currentAnalysis;
+  const hasAnalysis = !!job.currentAnalysis;
   const isAnalyzing =
     analysisStep !== 'idle' &&
     analysisStep !== 'complete' &&
@@ -112,7 +106,7 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
   };
 
   const runAnalysis = async () => {
-    if (!resumeFile || !currentJob.description) {
+    if (!resumeFile || !job.description) {
       toast({
         title: 'Missing requirements',
         description:
@@ -208,8 +202,8 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
         },
         body: JSON.stringify({
           resumeText: resumeText.trim(),
-          jobDescription: currentJob.description,
-          companyName: currentJob.company,
+          jobDescription: job.description,
+          companyName: job.company,
         }),
       });
 
@@ -247,7 +241,7 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
   };
 
   const exportAnalysis = () => {
-    if (!currentJob.currentAnalysis) return;
+    if (!job.currentAnalysis) return;
 
     // For now, just show a toast. PDF generation would be implemented here
     toast({
@@ -273,7 +267,7 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
               <Clock className="h-3 w-3" />
               Last analyzed:{' '}
               {new Date(
-                currentJob.analysisHistory?.[0]?.analysisDate || ''
+                job.analysisHistory?.[0]?.analysisDate || ''
               ).toLocaleDateString()}
             </Badge>
             <Button
@@ -417,7 +411,7 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
 
       {/* Analysis Results */}
       <AnimatePresence>
-        {hasAnalysis && currentJob.currentAnalysis && (
+        {hasAnalysis && job.currentAnalysis && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -426,24 +420,22 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
             <Separator />
 
             {/* ATS Score Display */}
-            <ATSScoreDisplay analysis={currentJob.currentAnalysis} />
+            <ATSScoreDisplay analysis={job.currentAnalysis} />
 
             {/* Strengths and Improvements */}
             <div className="grid lg:grid-cols-2 gap-6">
-              <StrengthsPanel
-                strengths={currentJob.currentAnalysis.strengths}
-              />
+              <StrengthsPanel strengths={job.currentAnalysis.strengths} />
               <ImprovementsPanel
-                improvements={currentJob.currentAnalysis.improvements}
-                missingKeywords={currentJob.currentAnalysis.missing_keywords}
+                improvements={job.currentAnalysis.improvements}
+                missingKeywords={job.currentAnalysis.missing_keywords}
               />
             </div>
 
             {/* Company Insights */}
-            {currentJob.companyInsights && (
+            {job.companyInsights && (
               <CompanyInsights
-                insights={currentJob.companyInsights}
-                companyName={currentJob.company}
+                insights={job.companyInsights}
+                companyName={job.company}
               />
             )}
           </motion.div>

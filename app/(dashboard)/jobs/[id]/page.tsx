@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useJobStore } from '@/lib/stores/jobStore';
 import { JobHeader } from '@/components/jobs/JobHeader';
@@ -11,47 +11,32 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { PROTECTED_ROUTES } from '@/lib/routes';
-import type { Job } from '@/types/job';
 
 function JobDetailsContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { getJob } = useJobStore();
+  const { jobs } = useJobStore();
 
-  const [job, setJob] = useState<Job | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const jobId = params.id as string;
   const activeTab = searchParams.get('tab') || 'overview';
 
+  // Wait for Zustand store to hydrate from localStorage
   useEffect(() => {
-    const loadJob = () => {
-      setIsLoading(true);
-      setError(null);
+    setIsHydrated(true);
+  }, []);
 
-      try {
-        const foundJob = getJob(jobId);
+  // Find job reactively - updates when jobs array changes
+  const job = useMemo(() => {
+    return jobs.find((j) => j.id === jobId);
+  }, [jobs, jobId]);
 
-        if (!foundJob) {
-          setError('Job not found');
-          setJob(null);
-        } else {
-          setJob(foundJob);
-        }
-      } catch (err) {
-        setError('Failed to load job details');
-        setJob(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (jobId) {
-      loadJob();
-    }
-  }, [jobId, getJob]);
+  // Three-state handling: loading, error, data
+  const isLoading = !isHydrated;
+  const hasError = isHydrated && !job;
+  const hasData = isHydrated && !!job;
 
   const handleTabChange = (value: string) => {
     const url = new URL(window.location.href);
@@ -59,7 +44,7 @@ function JobDetailsContent() {
     router.replace(url.pathname + url.search);
   };
 
-  // Loading state
+  // LOADING STATE: Store is hydrating from localStorage
   if (isLoading) {
     return (
       <div className="container py-8">
@@ -85,20 +70,19 @@ function JobDetailsContent() {
     );
   }
 
-  // Error state
-  if (error || !job) {
+  // ERROR STATE: Job not found after hydration
+  if (hasError) {
     return (
       <div className="container py-8">
         <Card>
           <CardContent className="text-center py-12">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {error || 'Job Not Found'}
+              Job Not Found
             </h3>
             <p className="text-gray-600 mb-4">
-              {error === 'Job not found'
-                ? "The job you're looking for doesn't exist or may have been deleted."
-                : 'There was an error loading the job details. Please try again.'}
+              The job you&apos;re looking for doesn&apos;t exist or may have
+              been deleted.
             </p>
             <button
               onClick={() => router.push(PROTECTED_ROUTES.JOBS)}
@@ -112,7 +96,13 @@ function JobDetailsContent() {
     );
   }
 
-  // Main content
+  // DATA STATE: Job found and ready to display
+  // TypeScript knows job is defined here due to hasData check above
+  if (!hasData || !job) {
+    // This should never happen due to state checks above, but TypeScript needs it
+    return null;
+  }
+
   return (
     <div className="container py-8">
       <div className="space-y-6">

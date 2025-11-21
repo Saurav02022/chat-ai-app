@@ -4,7 +4,6 @@ export { EditJobModal } from './EditJobModal';
 export { DeleteJobDialog } from './DeleteJobDialog';
 export { JobHeader } from './JobHeader';
 export { JobOverviewTab } from './JobOverviewTab';
-export { JobTimeline } from './JobTimeline';
 // ATS Analysis Components
 export { ATSScoreDisplay } from './ATSScoreDisplay';
 export { StrengthsPanel } from './StrengthsPanel';
