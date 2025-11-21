@@ -15,6 +15,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useJobStore } from '@/lib/stores/jobStore';
 import { PUBLIC_ROUTES, PROTECTED_ROUTES } from '@/lib/routes';
@@ -27,7 +33,6 @@ import {
   LogOut,
   Menu,
   Bell,
-  Search,
 } from 'lucide-react';
 
 const navigationItems = [
@@ -45,13 +50,11 @@ const navigationItems = [
     name: 'Resume',
     href: '/resume',
     icon: FileText,
-    badge: 'Soon',
   },
   {
     name: 'Interviews',
     href: '/interviews',
     icon: Video,
-    badge: 'Soon',
   },
   {
     name: 'Settings',
@@ -137,15 +140,22 @@ export function DashboardHeader() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-3">
-          {/* Search Button - Future Feature */}
-          <Button variant="ghost" size="sm" className="hidden sm:flex">
-            <Search className="h-4 w-4" />
-          </Button>
-
-          {/* Notifications - Future Feature */}
-          <Button variant="ghost" size="sm" className="hidden sm:flex">
-            <Bell className="h-4 w-4" />
-          </Button>
+          {/* Notifications - Coming Soon */}
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" className="hidden sm:flex">
+                  <Bell className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-sm font-medium">Coming Soon</p>
+                <p className="text-xs text-muted-foreground">
+                  Notifications feature in development
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           {/* User Menu */}
           <DropdownMenu>

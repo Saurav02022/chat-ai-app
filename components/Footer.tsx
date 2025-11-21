@@ -1,8 +1,6 @@
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { FOOTER_ROUTES, EXTERNAL_ROUTES } from '@/lib/routes';
 
 const footerSections = [
@@ -13,31 +11,28 @@ const footerSections = [
 ];
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container py-16">
-        <div className="grid gap-8 lg:grid-cols-4">
-          {/* Company Info */}
-          <div className="lg:col-span-3 space-y-4">
+      <div className="container h-20 flex items-center">
+        <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          {/* Left side - Brand and Social */}
+          <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-xl">
+              <span className="font-bold text-sm">
                 JobCraft <Badge variant="secondary">AI</Badge>
               </span>
             </div>
-            <p className="text-muted-foreground max-w-md">
-              AI-powered interview coaching platform helping job seekers
-              optimize their resumes, practice interviews, and land their dream
-              jobs with confidence.
-            </p>
-            <div className="flex space-x-2">
-              <Button variant="ghost" size="icon" asChild>
+            <div className="hidden sm:flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                 <Link
                   href={EXTERNAL_ROUTES.TWITTER}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <svg
-                    className="h-4 w-4"
+                    className="h-3.5 w-3.5"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -45,14 +40,14 @@ export function Footer() {
                   </svg>
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                 <Link
                   href={EXTERNAL_ROUTES.LINKEDIN}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <svg
-                    className="h-4 w-4"
+                    className="h-3.5 w-3.5"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -60,14 +55,14 @@ export function Footer() {
                   </svg>
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                 <Link
                   href={EXTERNAL_ROUTES.GITHUB}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <svg
-                    className="h-4 w-4"
+                    className="h-3.5 w-3.5"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -78,35 +73,22 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Footer Links */}
-          {footerSections.map((section) => (
-            <div key={section.title} className="space-y-3">
-              <h3 className="font-medium text-sm">{section.title}</h3>
-              <ul className="space-y-2">
-                {section.links.map((link) => (
-                  <li key={link.name}>
-                    <Button
-                      variant="link"
-                      className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                      asChild
-                    >
-                      <Link href={link.href}>{link.name}</Link>
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+          {/* Right side - Links and Copyright */}
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
+            <div className="flex items-center gap-4 text-sm">
+              {footerSections[0].links.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
             </div>
-          ))}
-        </div>
-
-        <Separator className="my-8" />
-
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} JobCraft AI. All rights reserved.
-          </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>Made with ❤️ for job seekers</span>
+            <div className="text-sm text-muted-foreground">
+              © {currentYear} JobCraft AI. All rights reserved.
+            </div>
           </div>
         </div>
       </div>

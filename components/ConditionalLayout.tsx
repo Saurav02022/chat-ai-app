@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthStore } from '@/lib/stores/authStore';
-import { DashboardHeader, DashboardFooter } from '@/components/dashboard';
+import { DashboardHeader } from '@/components/dashboard';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useEffect, useState } from 'react';
@@ -30,13 +30,12 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
     );
   }
 
-  // Authenticated layout - Dashboard Header/Footer for ALL pages
+  // Authenticated layout - Dashboard Header only (no footer)
   if (isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <DashboardHeader />
         <main className="flex-1">{children}</main>
-        <DashboardFooter />
       </div>
     );
   }
