@@ -124,11 +124,8 @@ export function DashboardHeader() {
             href={PROTECTED_ROUTES.DASHBOARD}
             className="flex items-center gap-2"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-              <span className="text-sm font-bold text-white">JC</span>
-            </div>
-            <span className="hidden font-bold sm:inline-block">
-              JobCraft AI
+            <span className="font-bold">
+              JobCraft <Badge variant="secondary">AI</Badge>
             </span>
           </Link>
 
