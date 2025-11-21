@@ -195,13 +195,6 @@ function JobsContent() {
         </div>
       )}
 
-      {/* Results Count */}
-      {filteredJobs.length > 0 && (
-        <div className="mt-6 text-center text-gray-600">
-          Showing {filteredJobs.length} of {jobs.length} job applications
-        </div>
-      )}
-
       {/* Create Job Modal */}
       <CreateJobModal
         open={isCreateModalOpen}

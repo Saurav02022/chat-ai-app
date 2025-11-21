@@ -20,22 +20,31 @@ function DashboardContent() {
   };
 
   return (
-    <div className="container py-8 relative">
+    <div className="container py-8">
       {/* Welcome Section */}
       <div className="mb-8">
-        <div className="flex items-center gap-4 mb-6">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src={user?.avatar || ''} alt={user?.name || ''} />
-            <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold">
-              Welcome back, {user?.name || 'User'}! 👋
-            </h1>
-            <p className="text-muted-foreground">
-              Ready to land your dream job?
-            </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={user?.avatar || ''} alt={user?.name || ''} />
+              <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-2xl font-bold">
+                Welcome back, {user?.name || 'User'}! 👋
+              </h1>
+              <p className="text-muted-foreground">
+                Ready to land your dream job?
+              </p>
+            </div>
           </div>
+          <Button
+            onClick={() => router.push('/jobs?action=create')}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Job
+          </Button>
         </div>
       </div>
 
@@ -46,16 +55,6 @@ function DashboardContent() {
       <div className="mt-8">
         <RecentJobs />
       </div>
-
-      {/* Floating Add Job Button */}
-      <Button
-        onClick={() => router.push('/jobs?action=create')}
-        size="lg"
-        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 h-14 px-6 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50 flex items-center gap-2 font-semibold"
-      >
-        <Plus className="h-5 w-5" />
-        <span>Add Job</span>
-      </Button>
     </div>
   );
 }
