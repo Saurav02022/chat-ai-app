@@ -6,10 +6,20 @@ import { useJobStore } from '@/lib/stores/jobStore';
 import { useMemo } from 'react';
 
 export function DashboardStats() {
-  const { jobs, getJobStats } = useJobStore();
+  const { jobs } = useJobStore();
 
   const stats = useMemo(() => {
-    const jobStats = getJobStats();
+    // Calculate job stats directly from jobs array
+    const jobStats = {
+      total: jobs.length,
+      applied: jobs.filter((job) => job.status === 'applied').length,
+      interviewing: jobs.filter((job) =>
+        ['phone-screen', 'interview'].includes(job.status)
+      ).length,
+      offers: jobs.filter((job) => job.status === 'offer').length,
+      rejected: jobs.filter((job) => job.status === 'rejected').length,
+    };
+
     const thisMonth = new Date().getMonth();
     const thisYear = new Date().getFullYear();
 
@@ -23,37 +33,49 @@ export function DashboardStats() {
     });
 
     // Calculate success rate (offers / total applications)
+    // Show "—" when no data available (better UX than 0%)
     const successRate =
       jobStats.total > 0
-        ? Math.round((jobStats.offers / jobStats.total) * 100)
-        : 0;
+        ? `${Math.round((jobStats.offers / jobStats.total) * 100)}%`
+        : '—';
 
     // Calculate interview rate (interviews / total applications)
     const interviewRate =
       jobStats.total > 0
-        ? Math.round((jobStats.interviewing / jobStats.total) * 100)
-        : 0;
+        ? `${Math.round((jobStats.interviewing / jobStats.total) * 100)}%`
+        : '—';
+
+    // Only show trends when there's actual data
+    const hasTrends = jobStats.total > 0;
 
     return {
       totalApplications: {
         value: jobStats.total,
         thisMonth: thisMonthJobs.length,
-        trend: { value: 12, label: 'from last month', isPositive: true },
+        trend: hasTrends
+          ? { value: 12, label: 'from last month', isPositive: true }
+          : undefined,
       },
       activeInterviews: {
         value: jobStats.interviewing,
-        trend: { value: 8, label: 'from last week', isPositive: true },
+        trend: hasTrends
+          ? { value: 8, label: 'from last week', isPositive: true }
+          : undefined,
       },
       successRate: {
-        value: `${successRate}%`,
-        trend: { value: 5, label: 'from last month', isPositive: true },
+        value: successRate,
+        trend: hasTrends
+          ? { value: 5, label: 'from last month', isPositive: true }
+          : undefined,
       },
       interviewRate: {
-        value: `${interviewRate}%`,
-        trend: { value: 3, label: 'from last month', isPositive: true },
+        value: interviewRate,
+        trend: hasTrends
+          ? { value: 3, label: 'from last month', isPositive: true }
+          : undefined,
       },
     };
-  }, [jobs, getJobStats]);
+  }, [jobs]);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

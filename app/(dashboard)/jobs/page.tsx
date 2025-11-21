@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -24,14 +25,34 @@ import { Plus, Search, Filter } from 'lucide-react';
 import type { JobStatus, JobType } from '@/types/job';
 
 function JobsContent() {
-  const { jobs, getFilteredJobs, setFilters, filters } = useJobStore();
+  const searchParams = useSearchParams();
+  const { jobs, setFilters, filters } = useJobStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Handle URL query parameter to open create modal
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'create') {
+      setIsCreateModalOpen(true);
+    }
+  }, [searchParams]);
+
   // Filter jobs based on search term and filters
   const filteredJobs = useMemo(() => {
-    let result = getFilteredJobs();
+    // Apply store filters first
+    let result = jobs.filter((job) => {
+      if (filters.status && job.status !== filters.status) return false;
+      if (filters.type && job.type !== filters.type) return false;
+      if (
+        filters.company &&
+        !job.company.toLowerCase().includes(filters.company.toLowerCase())
+      )
+        return false;
+      return true;
+    });
 
+    // Apply search term filter
     if (searchTerm) {
       result = result.filter(
         (job) =>
@@ -41,11 +62,12 @@ function JobsContent() {
       );
     }
 
+    // Sort by applied date (newest first)
     return result.sort(
       (a, b) =>
         new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime()
     );
-  }, [getFilteredJobs, searchTerm]);
+  }, [jobs, filters, searchTerm]);
 
   const handleStatusFilter = (status: string) => {
     setFilters({
@@ -58,7 +80,7 @@ function JobsContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container py-8">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
