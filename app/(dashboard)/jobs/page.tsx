@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -206,5 +206,9 @@ function JobsContent() {
 
 export default function JobsPage() {
   // TODO: Add AuthGuard wrapper for authentication protection
-  return <JobsContent />;
+  return (
+    <Suspense fallback={<div className="container py-8">Loading...</div>}>
+      <JobsContent />
+    </Suspense>
+  );
 }

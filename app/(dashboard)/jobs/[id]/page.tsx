@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useJobStore } from '@/lib/stores/jobStore';
 import { JobHeader } from '@/components/jobs/JobHeader';
@@ -179,5 +179,9 @@ function JobDetailsContent() {
 
 export default function JobDetailsPage() {
   // TODO: Add AuthGuard wrapper for authentication protection
-  return <JobDetailsContent />;
+  return (
+    <Suspense fallback={<div className="container py-8">Loading...</div>}>
+      <JobDetailsContent />
+    </Suspense>
+  );
 }

@@ -102,11 +102,6 @@ export function DashboardHeader() {
           >
             <Icon className="h-4 w-4" />
             <span>{item.name}</span>
-            {item.badge && (
-              <Badge variant="secondary" className="ml-auto text-xs">
-                {item.badge}
-              </Badge>
-            )}
             {item.name === 'Jobs' && activeJobs > 0 && (
               <Badge variant="default" className="ml-auto text-xs">
                 {activeJobs}
