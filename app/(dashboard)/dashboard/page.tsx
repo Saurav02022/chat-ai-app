@@ -1,31 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PUBLIC_ROUTES } from '@/lib/routes';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useJobStore } from '@/lib/stores/jobStore';
-import {
-  DashboardStats,
-  QuickActions,
-  RecentJobs,
-} from '@/components/dashboard';
-import { initializeMockData } from '@/lib/mockData';
+import { DashboardStats, RecentJobs } from '@/components/dashboard';
 
 function DashboardContent() {
   const { user, logout } = useAuthStore();
-  const { jobs, addJob } = useJobStore();
+  const { jobs } = useJobStore();
   const router = useRouter();
-
-  // Initialize with mock data if no jobs exist
-  useEffect(() => {
-    if (jobs.length === 0) {
-      const mockJobs = initializeMockData();
-      mockJobs.forEach((job) => addJob(job));
-    }
-  }, [jobs.length, addJob]);
 
   const handleSignOut = async () => {
     logout();
@@ -33,7 +20,7 @@ function DashboardContent() {
   };
 
   return (
-    <div className="container py-8">
+    <div className="container py-8 relative">
       {/* Welcome Section */}
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-6">
@@ -55,15 +42,20 @@ function DashboardContent() {
       {/* Dashboard Stats */}
       <DashboardStats />
 
-      {/* Quick Actions */}
-      <div className="mt-8">
-        <QuickActions />
-      </div>
-
       {/* Recent Jobs */}
       <div className="mt-8">
         <RecentJobs />
       </div>
+
+      {/* Floating Add Job Button */}
+      <Button
+        onClick={() => router.push('/jobs?action=create')}
+        size="lg"
+        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 h-14 px-6 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50 flex items-center gap-2 font-semibold"
+      >
+        <Plus className="h-5 w-5" />
+        <span>Add Job</span>
+      </Button>
     </div>
   );
 }

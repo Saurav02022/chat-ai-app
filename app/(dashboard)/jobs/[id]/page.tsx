@@ -62,7 +62,7 @@ function JobDetailsContent() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container py-8">
         <div className="space-y-6">
           {/* Header skeleton */}
           <div className="space-y-4">
@@ -88,7 +88,7 @@ function JobDetailsContent() {
   // Error state
   if (error || !job) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container py-8">
         <Card>
           <CardContent className="text-center py-12">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -114,7 +114,7 @@ function JobDetailsContent() {
 
   // Main content
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container py-8">
       <div className="space-y-6">
         {/* Job Header */}
         <JobHeader job={job} />
