@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -14,9 +14,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useJobStore } from '@/lib/stores/jobStore';
 import { useToast } from '@/hooks/use-toast';
-import { FileUpload } from '@/components/shared/FileUpload';
-import { ResumePreview } from '@/components/shared/ResumePreview';
-import { getFileMetadata } from '@/lib/fileStorage';
 import {
   Building2,
   MapPin,
@@ -29,11 +26,9 @@ import {
   User,
   Mail,
   ExternalLink,
-  Upload,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Job } from '@/types/job';
-import type { FileMetadata } from '@/types/file';
 
 const typeLabels = {
   'full-time': 'Full Time',
@@ -47,22 +42,10 @@ interface JobOverviewTabProps {
 }
 
 export function JobOverviewTab({ job }: JobOverviewTabProps) {
-  const { updateJob, attachResumeToJob, removeResumeFromJob } = useJobStore();
+  const { updateJob } = useJobStore();
   const { toast } = useToast();
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState(job.notes || '');
-  const [resumeFile, setResumeFile] = useState<FileMetadata | null>(null);
-  const [showUpload, setShowUpload] = useState(false);
-
-  // Load resume file metadata if exists
-  useEffect(() => {
-    if (job.resumeFileId) {
-      const fileMetadata = getFileMetadata(job.resumeFileId);
-      setResumeFile(fileMetadata);
-    } else {
-      setResumeFile(null);
-    }
-  }, [job.resumeFileId]);
 
   const handleSaveNotes = () => {
     updateJob(job.id, { notes: notesValue });
@@ -76,21 +59,6 @@ export function JobOverviewTab({ job }: JobOverviewTabProps) {
   const handleCancelNotes = () => {
     setNotesValue(job.notes || '');
     setIsEditingNotes(false);
-  };
-
-  const handleFileUploaded = (fileMetadata: FileMetadata) => {
-    attachResumeToJob(job.id, fileMetadata.id);
-    setResumeFile(fileMetadata);
-    setShowUpload(false);
-  };
-
-  const handleResumeDelete = (fileId: string) => {
-    removeResumeFromJob(job.id);
-    setResumeFile(null);
-  };
-
-  const handleResumeReplace = () => {
-    setShowUpload(true);
   };
 
   const formatJobType = (type: string) => {
@@ -214,63 +182,6 @@ export function JobOverviewTab({ job }: JobOverviewTabProps) {
           </CardContent>
         </Card>
       )}
-
-      {/* Resume Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Resume
-            </CardTitle>
-            {!resumeFile && !showUpload && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowUpload(true)}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Resume
-              </Button>
-            )}
-          </div>
-          <CardDescription>
-            Upload your resume for this job application
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {showUpload ? (
-            <div className="space-y-4">
-              <FileUpload
-                onFileUploaded={handleFileUploaded}
-                jobId={job.id}
-                maxFiles={1}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowUpload(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : resumeFile ? (
-            <ResumePreview
-              file={resumeFile}
-              onDelete={handleResumeDelete}
-              onReplace={handleResumeReplace}
-            />
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-sm">No resume uploaded yet</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Upload your resume to get started with AI analysis
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Notes Section */}
       <Card>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { analyzeResumeForATS, generateCompanyInsights } from '@/lib/ai';
+import { analyzeResumeForATS } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,19 +14,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Run AI analysis
-    const [atsResult, companyInsights] = await Promise.all([
-      analyzeResumeForATS(resumeText, jobDescription, companyName),
+    // Run AI analysis - focused on resume-to-JD matching
+    const atsResult = await analyzeResumeForATS(
+      resumeText,
+      jobDescription,
       companyName
-        ? generateCompanyInsights(companyName, jobDescription)
-        : Promise.resolve(null),
-    ]);
+    );
 
     return NextResponse.json({
       success: true,
       data: {
         atsResult,
-        companyInsights,
       },
     });
   } catch (error) {

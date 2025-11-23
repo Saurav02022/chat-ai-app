@@ -6,10 +6,11 @@ import { useJobStore } from '@/lib/stores/jobStore';
 import { JobHeader } from '@/components/jobs/JobHeader';
 import { JobOverviewTab } from '@/components/jobs/JobOverviewTab';
 import { ResumeReviewTab } from '@/components/jobs/ResumeReviewTab';
+import { InterviewPrepTab } from '@/components/jobs/InterviewPrepTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, FileText, Video, BarChart3 } from 'lucide-react';
 import { PROTECTED_ROUTES } from '@/lib/routes';
 
 function JobDetailsContent() {
@@ -47,7 +48,7 @@ function JobDetailsContent() {
   // LOADING STATE: Store is hydrating from localStorage
   if (isLoading) {
     return (
-      <div className="container py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
         <div className="space-y-6">
           {/* Header skeleton */}
           <div className="space-y-4">
@@ -59,8 +60,8 @@ function JobDetailsContent() {
           {/* Tabs skeleton */}
           <div className="space-y-4">
             <div className="flex space-x-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-24" />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-32" />
               ))}
             </div>
             <Skeleton className="h-64 w-full" />
@@ -73,20 +74,20 @@ function JobDetailsContent() {
   // ERROR STATE: Job not found after hydration
   if (hasError) {
     return (
-      <div className="container py-8">
-        <Card>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+        <Card className="border-red-200 bg-red-50/50">
           <CardContent className="text-center py-12">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Job Not Found
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-6">
               The job you&apos;re looking for doesn&apos;t exist or may have
               been deleted.
             </p>
             <button
               onClick={() => router.push(PROTECTED_ROUTES.JOBS)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               ← Back to Jobs
             </button>
@@ -97,14 +98,12 @@ function JobDetailsContent() {
   }
 
   // DATA STATE: Job found and ready to display
-  // TypeScript knows job is defined here due to hasData check above
   if (!hasData || !job) {
-    // This should never happen due to state checks above, but TypeScript needs it
     return null;
   }
 
   return (
-    <div className="container py-8">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
       <div className="space-y-6">
         {/* Job Header */}
         <JobHeader job={job} />
@@ -115,12 +114,31 @@ function JobDetailsContent() {
           onValueChange={handleTabChange}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="resume">Resume Review</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="assistant">Live Assistant</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+            <TabsTrigger
+              value="overview"
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Info</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="resume"
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Resume & Analysis</span>
+              <span className="sm:hidden">Resume</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="interview"
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <Video className="h-4 w-4" />
+              <span className="hidden sm:inline">Interview Prep</span>
+              <span className="sm:hidden">Interview</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -131,45 +149,8 @@ function JobDetailsContent() {
             <ResumeReviewTab job={job} />
           </TabsContent>
 
-          <TabsContent value="templates" className="mt-6">
-            <Card>
-              <CardContent className="text-center py-12">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Templates
-                </h3>
-                <p className="text-gray-600">
-                  Template management will be implemented in a future update.
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="assistant" className="mt-6">
-            <Card>
-              <CardContent className="text-center py-12">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Live Assistant
-                </h3>
-                <p className="text-gray-600">
-                  AI-powered interview assistant will be implemented in a future
-                  update.
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="mt-6">
-            <Card>
-              <CardContent className="text-center py-12">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Analytics
-                </h3>
-                <p className="text-gray-600">
-                  Job application analytics will be implemented in a future
-                  update.
-                </p>
-              </CardContent>
-            </Card>
+          <TabsContent value="interview" className="mt-6">
+            <InterviewPrepTab job={job} />
           </TabsContent>
         </Tabs>
       </div>
@@ -178,9 +159,19 @@ function JobDetailsContent() {
 }
 
 export default function JobDetailsPage() {
-  // TODO: Add AuthGuard wrapper for authentication protection
   return (
-    <Suspense fallback={<div className="container py-8">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600 mb-4" />
+              <p className="text-gray-600">Loading job details...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
       <JobDetailsContent />
     </Suspense>
   );

@@ -6,7 +6,6 @@ import type {
   JobStore,
   JobFilters,
   ATSAnalysisResult,
-  CompanyInsights,
   AnalysisHistory,
 } from '@/types/job';
 
@@ -138,11 +137,7 @@ export const useJobStore = create<JobStore>()(
         })),
 
       // Analysis management
-      saveAnalysisResult: (
-        jobId: string,
-        analysis: ATSAnalysisResult,
-        insights?: CompanyInsights
-      ) =>
+      saveAnalysisResult: (jobId: string, analysis: ATSAnalysisResult) =>
         set((state) => ({
           jobs: state.jobs.map((job) => {
             if (job.id === jobId) {
@@ -150,7 +145,6 @@ export const useJobStore = create<JobStore>()(
                 id: `analysis_${Date.now()}`,
                 analysisDate: new Date().toISOString(),
                 atsResult: analysis,
-                companyInsights: insights,
                 resumeFileId: job.resumeFileId || '',
                 jobDescriptionHash: btoa(job.description || '').substring(
                   0,
@@ -161,7 +155,6 @@ export const useJobStore = create<JobStore>()(
               return {
                 ...job,
                 currentAnalysis: analysis,
-                companyInsights: insights,
                 analysisHistory: [
                   historyEntry,
                   ...(job.analysisHistory || []),
@@ -186,7 +179,6 @@ export const useJobStore = create<JobStore>()(
               ? {
                   ...job,
                   currentAnalysis: undefined,
-                  companyInsights: undefined,
                   analysisHistory: [],
                   lastUpdated: new Date(),
                 }

@@ -1,5 +1,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { ATSAnalysisResult } from '@/types/ai';
+import {
+  createPDFExtractionPrompt,
+  createJobParsingPrompt,
+  createKeywordExtractionPrompt,
+  createATSAnalysisPrompt,
+  createImprovementSuggestionsPrompt,
+} from './prompts';
 
 // Initialize Gemini AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -34,22 +41,55 @@ async function withRetry<T>(
 }
 
 /**
- * Use Gemini for text processing (cheaper and faster for most tasks)
+ * Use Gemini for text processing
+ * Model: gemini-2.5-flash (officially supports PDF, audio, video, text)
+ * Source: https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash
  */
 export async function processWithGemini(prompt: string): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // Use Gemini 2.5 Flash - fast, intelligent, supports multimodal
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await withRetry(() => model.generateContent(prompt));
     const response = await result.response;
     return response.text();
   } catch (error) {
     console.error('Gemini API failed:', error);
-    throw new Error('Failed to process with Gemini');
+    throw new Error(
+      `Failed to process with Gemini: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
 /**
- * Extract text from PDF using AI (OCR-like capability)
+ * Use Gemini for JSON output with controlled generation
+ * This uses Gemini's responseM imeType feature to guarantee JSON output without markdown wrappers
+ * Source: https://ai.google.dev/gemini-api/docs/structured-output
+ */
+export async function processWithGeminiJSON(prompt: string): Promise<string> {
+  try {
+    // Use Gemini 2.5 Flash with JSON mode
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    });
+
+    const result = await withRetry(() => model.generateContent(prompt));
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Gemini JSON API failed:', error);
+    throw new Error(
+      `Failed to process with Gemini JSON mode: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+}
+
+/**
+ * Extract text from PDF using Gemini 2.5 Flash
+ * Gemini 2.5 models officially support PDF inputs
+ * Source: https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash
  */
 export async function extractTextFromPDF(base64PDF: string): Promise<{
   text: string;
@@ -58,29 +98,57 @@ export async function extractTextFromPDF(base64PDF: string): Promise<{
     sections?: Record<string, string>;
   };
 }> {
-  const prompt = `
-You are a PDF text extraction expert. Extract and structure the text from this resume/document.
-
-Return a JSON response with:
-1. "text" - the complete extracted text
-2. "structured_data" - organized sections like:
-   - contact_info: {email, phone, linkedin, github, etc.}
-   - sections: {summary, experience, education, skills, etc.}
-
-Be thorough and accurate. Preserve formatting where important.
-
-PDF Data: ${base64PDF.substring(0, 1000)}... (truncated for demo)
-`;
-
   try {
-    const result = await processWithGemini(prompt);
-    return JSON.parse(result);
+    // Remove data URL prefix if present (e.g., "data:application/pdf;base64,")
+    const base64Data = base64PDF.includes(',')
+      ? base64PDF.split(',')[1]
+      : base64PDF;
+
+    console.log(
+      `Processing PDF with Gemini 2.5 Flash (${Math.round(base64Data.length / 1024)} KB)`
+    );
+
+    // Use Gemini 2.5 Flash - officially supports PDF
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    // Use well-engineered prompt from prompts directory
+    const prompt = createPDFExtractionPrompt();
+
+    // Send full PDF to Gemini using inlineData
+    const result = await withRetry(() =>
+      model.generateContent([
+        {
+          inlineData: {
+            mimeType: 'application/pdf',
+            data: base64Data, // Send COMPLETE PDF, not truncated!
+          },
+        },
+        { text: prompt },
+      ])
+    );
+
+    const response = await result.response;
+    const extractedText = response.text().trim();
+
+    console.log(
+      `✅ Successfully extracted ${extractedText.length} characters from PDF`
+    );
+
+    if (!extractedText || extractedText.length < 10) {
+      throw new Error(
+        'No meaningful text was extracted from the PDF. The PDF might be empty or image-based.'
+      );
+    }
+
+    return {
+      text: extractedText,
+      structured_data: {}, // Can be enhanced with AI later if needed
+    };
   } catch (error) {
     console.error('PDF extraction failed:', error);
-    return {
-      text: '',
-      structured_data: {},
-    };
+    throw new Error(
+      `Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
@@ -99,29 +167,12 @@ export async function parseJobDescription(jobDescription: string): Promise<{
   skills: string[];
   benefits: string[];
 }> {
-  const prompt = `
-Analyze this job description and extract structured information:
-
-Job Description:
-${jobDescription}
-
-Return JSON with these fields:
-- title: job title
-- company: company name
-- location: job location
-- salary: salary range if mentioned
-- experience_level: required experience (e.g., "3+ years", "Senior", etc.)
-- employment_type: full-time, part-time, contract, etc.
-- requirements: array of job requirements
-- responsibilities: array of job responsibilities
-- skills: array of required technical/soft skills
-- benefits: array of benefits offered
-
-Be precise and extract only what's explicitly mentioned.
-`;
+  // Use well-engineered prompt from prompts directory
+  const prompt = createJobParsingPrompt({ jobDescription });
 
   try {
-    const result = await processWithGemini(prompt);
+    // Use Gemini JSON mode for guaranteed JSON output (no markdown wrappers)
+    const result = await processWithGeminiJSON(prompt);
     return JSON.parse(result);
   } catch (error) {
     console.error('Job parsing failed:', error);
@@ -146,30 +197,12 @@ export async function extractKeywords(
   experience_keywords: string[];
   industry_terms: string[];
 }> {
-  const prompt = `
-Analyze this ${context} text and extract relevant keywords categorized as:
-
-1. Technical Skills: programming languages, frameworks, tools, technologies
-2. Soft Skills: leadership, communication, problem-solving, etc.
-3. Experience Keywords: years of experience, job titles, seniority levels
-4. Industry Terms: domain-specific terminology, methodologies, certifications
-
-Text:
-${text}
-
-Return JSON format:
-{
-  "technical_skills": [],
-  "soft_skills": [],
-  "experience_keywords": [],
-  "industry_terms": []
-}
-
-Be comprehensive but accurate. Only include skills/terms that are clearly mentioned.
-`;
+  // Use well-engineered prompt from prompts directory
+  const prompt = createKeywordExtractionPrompt({ text, context });
 
   try {
-    const result = await processWithGemini(prompt);
+    // Use Gemini JSON mode for guaranteed JSON output (no markdown wrappers)
+    const result = await processWithGeminiJSON(prompt);
     return JSON.parse(result);
   } catch (error) {
     console.error('Keyword extraction failed:', error);
@@ -208,59 +241,17 @@ export async function analyzeResumeForATS(
 }> {
   const startTime = Date.now();
 
-  const prompt = `
-You are an expert ATS (Applicant Tracking System) analyzer with 10+ years of experience in recruitment technology. 
-
-IMPORTANT SCORING GUIDELINES:
-- Use weighted scoring: Keyword Match (30%), Content Quality (25%), Format Score (20%), Experience Match (15%), Skills Alignment (10%)
-- Scores must be realistic and well-calibrated (most resumes score 60-85)
-- Be specific and actionable in feedback
-- Consider industry standards and best practices
-
-${companyName ? `Company: ${companyName}` : ''}
-
-Job Description:
-${jobDescription}
-
-Resume:
-${resumeText}
-
-Analyze this resume against the job description with these specific criteria:
-
-1. **Keyword Match (30% weight)**: Exact and semantic matches, keyword density, context relevance
-2. **Content Quality (25% weight)**: Quantified achievements, action verbs, clarity, impact statements
-3. **Format Score (20% weight)**: ATS-friendly structure, consistent formatting, proper sections
-4. **Experience Match (15% weight)**: Relevant roles, progression, industry alignment
-5. **Skills Alignment (10% weight)**: Technical and soft skills match, proficiency levels
-
-Provide detailed analysis with:
-- Realistic scores (0-100) for each category
-- Top 5 specific strengths with examples
-- Top 5 actionable improvements with implementation guidance
-- Missing keywords that would significantly improve ATS ranking
-- Overall confidence level in the analysis
-
-Return JSON format:
-{
-  "overall_score": 0,
-  "keyword_match": 0,
-  "format_score": 0,
-  "content_quality": 0,
-  "experience_match": 0,
-  "skills_alignment": 0,
-  "strengths": ["Specific strength with example context"],
-  "improvements": ["Actionable improvement with how-to guidance"],
-  "missing_keywords": ["high-impact keywords from job description"],
-  "confidence_level": "high"
-}
-
-Be thorough, realistic, and provide insights that will genuinely help improve the resume's ATS performance.
-`;
+  // Use well-engineered prompt from prompts directory
+  const prompt = createATSAnalysisPrompt({
+    resumeText,
+    jobDescription,
+    companyName,
+  });
 
   try {
-    // Use Gemini for AI analysis
-    const result = await processWithGemini(prompt);
-    const modelUsed = 'gemini-pro';
+    // Use Gemini JSON mode for guaranteed JSON output (no markdown wrappers)
+    const result = await processWithGeminiJSON(prompt);
+    const modelUsed = 'gemini-2.5-flash-json';
 
     const analysis = JSON.parse(result);
     const processingTime = Date.now() - startTime;
@@ -387,35 +378,16 @@ export async function generateImprovementSuggestions(
   }>;
   low_priority: Array<{ suggestion: string; reason: string; example?: string }>;
 }> {
-  const prompt = `
-Based on the resume analysis, provide specific improvement suggestions.
-
-Resume:
-${resumeText}
-
-Job Description:
-${jobDescription}
-
-Analysis Results:
-${JSON.stringify(analysisResults, null, 2)}
-
-Provide improvement suggestions categorized by priority with:
-- Specific, actionable suggestion
-- Clear reason why it's important
-- Example of how to implement (when applicable)
-
-Return JSON format:
-{
-  "high_priority": [{"suggestion": "", "reason": "", "example": ""}],
-  "medium_priority": [{"suggestion": "", "reason": "", "example": ""}],
-  "low_priority": [{"suggestion": "", "reason": "", "example": ""}]
-}
-
-Focus on actionable improvements that will increase ATS scores.
-`;
+  // Use well-engineered prompt from prompts directory
+  const prompt = createImprovementSuggestionsPrompt({
+    resumeText,
+    jobDescription,
+    analysisResults: analysisResults as unknown,
+  });
 
   try {
-    const result = await processWithGemini(prompt);
+    // Use Gemini JSON mode for guaranteed JSON output (no markdown wrappers)
+    const result = await processWithGeminiJSON(prompt);
     return JSON.parse(result);
   } catch (error) {
     console.error('Suggestion generation failed:', error);
@@ -423,55 +395,6 @@ Focus on actionable improvements that will increase ATS scores.
       high_priority: [],
       medium_priority: [],
       low_priority: [],
-    };
-  }
-}
-
-/**
- * Generate company-specific insights using AI
- */
-export async function generateCompanyInsights(
-  companyName: string,
-  jobDescription: string
-): Promise<{
-  company_values: string[];
-  cultural_fit_tips: string[];
-  success_factors: string[];
-  competitive_advantages: string[];
-}> {
-  const prompt = `
-Analyze this job description from ${companyName} and provide insights to help candidates.
-
-Job Description:
-${jobDescription}
-
-Provide insights on:
-1. Company values (based on job description language)
-2. Cultural fit tips (what the company values in candidates)
-3. Success factors (what makes someone successful in this role)
-4. Competitive advantages (what would make a candidate stand out)
-
-Return JSON format:
-{
-  "company_values": [],
-  "cultural_fit_tips": [],
-  "success_factors": [],
-  "competitive_advantages": []
-}
-
-Be specific and actionable based on the job description content.
-`;
-
-  try {
-    const result = await processWithGemini(prompt);
-    return JSON.parse(result);
-  } catch (error) {
-    console.error('Company insights generation failed:', error);
-    return {
-      company_values: [],
-      cultural_fit_tips: [],
-      success_factors: [],
-      competitive_advantages: [],
     };
   }
 }

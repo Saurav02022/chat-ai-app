@@ -22,7 +22,7 @@ interface ComingSoonProps {
 export function ComingSoon({
   title,
   description,
-  backUrl = '/dashboard',
+  backUrl = '/',
   backLabel = 'Back to Dashboard',
   features = [],
   developmentDay = 10,

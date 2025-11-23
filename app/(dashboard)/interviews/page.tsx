@@ -7,7 +7,7 @@ export default function InterviewsPage() {
     <ComingSoon
       title="Interview Preparation"
       description="Schedule, track, and prepare for interviews with AI-powered mock interviews and personalized feedback."
-      backUrl="/dashboard"
+      backUrl="/"
       backLabel="Back to Dashboard"
       developmentDay={8}
       priority="medium"

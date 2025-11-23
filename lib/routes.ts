@@ -16,7 +16,7 @@ export const PUBLIC_ROUTES = {
 
 // Protected routes - require authentication
 export const PROTECTED_ROUTES = {
-  DASHBOARD: '/dashboard',
+  DASHBOARD: '/', // Dashboard is now merged with home page
   JOBS: '/jobs',
   SETTINGS: '/settings',
 } as const;
@@ -119,7 +119,6 @@ export function getRouteTitle(pathname: string): string {
     [PUBLIC_ROUTES.DEMO]: 'Demo - JobCraft AI',
     [PUBLIC_ROUTES.PRICING]: 'Pricing - JobCraft AI',
     [PUBLIC_ROUTES.SUPPORT]: 'Support - JobCraft AI',
-    [PROTECTED_ROUTES.DASHBOARD]: 'Dashboard - JobCraft AI',
     [PROTECTED_ROUTES.JOBS]: 'Job Applications - JobCraft AI',
     [PROTECTED_ROUTES.SETTINGS]: 'Settings - JobCraft AI',
   };

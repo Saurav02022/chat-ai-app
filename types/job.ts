@@ -40,7 +40,6 @@ export interface AnalysisHistory {
   id: string;
   analysisDate: string;
   atsResult: ATSAnalysisResult;
-  companyInsights?: CompanyInsights;
   resumeFileId: string;
   jobDescriptionHash: string; // To detect if job description changed
 }
@@ -108,11 +107,7 @@ export interface JobActions {
   removeResumeFromJob: (jobId: string) => void;
 
   // Analysis management
-  saveAnalysisResult: (
-    jobId: string,
-    analysis: ATSAnalysisResult,
-    insights?: CompanyInsights
-  ) => void;
+  saveAnalysisResult: (jobId: string, analysis: ATSAnalysisResult) => void;
   getAnalysisHistory: (jobId: string) => AnalysisHistory[];
   clearAnalysisHistory: (jobId: string) => void;
 

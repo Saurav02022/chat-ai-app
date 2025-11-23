@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processWithGemini } from '@/lib/ai';
+import { extractTextFromPDF } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,30 +17,23 @@ export async function POST(request: NextRequest) {
     let extractedText = '';
 
     if (fileType === 'application/pdf') {
-      // For PDF files, use AI to extract text
-      const prompt = `
-Extract all text content from this PDF resume/document. Return only the plain text content without any formatting or metadata.
-
-Focus on:
-- Personal information (name, contact details)
-- Professional summary/objective
-- Work experience with dates and descriptions
-- Education details
-- Skills and certifications
-- Any other relevant text content
-
-Return the extracted text in a clean, readable format. Do not include any JSON formatting or additional commentary.
-
-PDF Base64 Data: ${fileData.substring(0, 2000)}...
-`;
-
+      // For PDF files, use Gemini 2.5 Flash (supports PDF natively)
       try {
-        // Use Gemini for text extraction
-        extractedText = await processWithGemini(prompt);
+        console.log('Processing PDF with Gemini 2.5 Flash...');
+        const result = await extractTextFromPDF(fileData);
+
+        if (!result.text || result.text.trim().length < 10) {
+          throw new Error('No meaningful text extracted from PDF');
+        }
+
+        extractedText = result.text;
+        console.log(
+          `✅ Extraction complete: ${extractedText.length} characters`
+        );
       } catch (geminiError) {
-        console.error('Gemini extraction failed:', geminiError);
+        console.error('Gemini PDF extraction failed:', geminiError);
         throw new Error(
-          'Unable to extract text from PDF. Please try a different file format.'
+          `Unable to extract text from PDF: ${geminiError instanceof Error ? geminiError.message : 'Unknown error'}`
         );
       }
     } else {

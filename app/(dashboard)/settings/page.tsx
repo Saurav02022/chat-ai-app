@@ -7,7 +7,7 @@ function SettingsContent() {
     <ComingSoon
       title="Account Settings"
       description="Customize your JobCraft AI experience, manage preferences, and configure your profile."
-      backUrl="/dashboard"
+      backUrl="/"
       backLabel="Back to Dashboard"
       features={[
         'Profile management',

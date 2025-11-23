@@ -5,13 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  AlertTriangle,
-  ArrowRight,
-  Copy,
+  AlertCircle,
   CheckCircle,
-  Lightbulb,
   Target,
-  Zap,
+  Flame,
+  Copy,
+  Check,
+  ChevronRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
@@ -27,38 +27,30 @@ export function ImprovementsPanel({
   missingKeywords = [],
   className,
 }: ImprovementsPanelProps) {
-  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
-  const [copiedItems, setCopiedItems] = useState<Set<number>>(new Set());
+  const [completedItems, setCompletedItems] = useState<Set<number>>(new Set());
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const toggleExpanded = (index: number) => {
-    const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index);
+  const toggleComplete = (index: number) => {
+    const newCompleted = new Set(completedItems);
+    if (newCompleted.has(index)) {
+      newCompleted.delete(index);
     } else {
-      newExpanded.add(index);
+      newCompleted.add(index);
     }
-    setExpandedItems(newExpanded);
+    setCompletedItems(newCompleted);
   };
 
   const copyToClipboard = async (text: string, index: number) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedItems(new Set([...copiedItems, index]));
+      setCopiedIndex(index);
       toast({
-        title: 'Copied!',
-        description: 'Improvement suggestion copied to clipboard',
+        title: '✓ Copied',
+        description: 'Improvement copied to clipboard',
       });
-
-      // Reset copied state after 2 seconds
-      setTimeout(() => {
-        setCopiedItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(index);
-          return newSet;
-        });
-      }, 2000);
-    } catch (error) {
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch {
       toast({
         title: 'Copy failed',
         description: 'Unable to copy to clipboard',
@@ -67,44 +59,57 @@ export function ImprovementsPanel({
     }
   };
 
-  const getPriorityIcon = (index: number) => {
-    if (index === 0) return <AlertTriangle className="h-5 w-5 text-red-600" />;
-    if (index === 1) return <Target className="h-5 w-5 text-orange-600" />;
-    return <Lightbulb className="h-5 w-5 text-yellow-600" />;
-  };
-
-  const getPriorityBadge = (index: number) => {
-    if (index === 0)
-      return { text: 'High Priority', className: 'bg-red-100 text-red-800' };
-    if (index === 1)
+  const getPriority = (index: number) => {
+    if (index < 2) {
       return {
-        text: 'Medium Priority',
-        className: 'bg-orange-100 text-orange-800',
+        icon: Flame,
+        label: 'Critical',
+        color: 'red',
+        bgColor: 'bg-red-50',
+        borderColor: 'border-l-red-500',
+        badgeClass: 'bg-red-100 text-red-700 border-red-300',
+        iconColor: 'text-red-600',
       };
-    return { text: 'Low Priority', className: 'bg-yellow-100 text-yellow-800' };
-  };
-
-  const getPriorityBorder = (index: number) => {
-    if (index === 0) return 'border-red-200 bg-red-50';
-    if (index === 1) return 'border-orange-200 bg-orange-50';
-    return 'border-yellow-200 bg-yellow-50';
+    }
+    if (index < 4) {
+      return {
+        icon: AlertCircle,
+        label: 'Important',
+        color: 'orange',
+        bgColor: 'bg-orange-50',
+        borderColor: 'border-l-orange-500',
+        badgeClass: 'bg-orange-100 text-orange-700 border-orange-300',
+        iconColor: 'text-orange-600',
+      };
+    }
+    return {
+      icon: Target,
+      label: 'Recommended',
+      color: 'yellow',
+      bgColor: 'bg-yellow-50',
+      borderColor: 'border-l-yellow-500',
+      badgeClass: 'bg-yellow-100 text-yellow-700 border-yellow-300',
+      iconColor: 'text-yellow-600',
+    };
   };
 
   if (!improvements || improvements.length === 0) {
     return (
-      <Card className={className}>
+      <Card className={`${className} shadow-md`}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-yellow-600" />
-            Improvement Opportunities
+          <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <CheckCircle className="h-6 w-6 text-green-600" />
+            Action Items
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
-            <p className="font-medium">Great job!</p>
-            <p className="text-sm mt-1">
-              No major improvements needed at this time.
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+            <p className="text-lg font-semibold text-green-900">Excellent!</p>
+            <p className="text-base text-gray-600 mt-2 leading-relaxed">
+              No critical improvements needed right now.
             </p>
           </div>
         </CardContent>
@@ -112,164 +117,213 @@ export function ImprovementsPanel({
     );
   }
 
+  const completedCount = completedItems.size;
+  const totalCount = improvements.length;
+  const progress = (completedCount / totalCount) * 100;
+
   return (
-    <Card className={className}>
+    <Card className={`${className} shadow-md`}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5 text-yellow-600" />
-          Improvement Opportunities
-          <Badge variant="secondary" className="ml-auto">
-            {improvements.length} suggestions
-          </Badge>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Target className="h-6 w-6 text-blue-600" />
+            Action Items
+          </CardTitle>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600 font-medium">
+              {completedCount} / {totalCount} done
+            </span>
+            <div className="w-20 h-2.5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+              <motion.div
+                className="h-full bg-green-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {improvements.map((improvement, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className={`p-4 rounded-lg border hover:shadow-sm transition-all ${getPriorityBorder(index)}`}
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  {getPriorityIcon(index)}
-                </div>
+          {improvements.map((improvement, index) => {
+            const priority = getPriority(index);
+            const PriorityIcon = priority.icon;
+            const isCompleted = completedItems.has(index);
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <Badge
-                      variant="secondary"
-                      className={getPriorityBadge(index).className}
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className={`group relative border-l-4 ${priority.borderColor} ${
+                  isCompleted ? 'opacity-50' : ''
+                } transition-opacity`}
+              >
+                <div
+                  className={`p-4 rounded-r-lg border border-l-0 ${priority.bgColor} hover:shadow-md transition-shadow shadow-sm`}
+                >
+                  {/* Header */}
+                  <div className="flex items-start gap-4 mb-2">
+                    <button
+                      onClick={() => toggleComplete(index)}
+                      className="mt-1 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
                     >
-                      {getPriorityBadge(index).text}
-                    </Badge>
-
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(improvement, index)}
-                        className="h-8 w-8 p-0"
+                      <div
+                        className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
+                          isCompleted
+                            ? 'bg-green-500 border-green-500'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
                       >
-                        {copiedItems.has(index) ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
+                        {isCompleted && (
+                          <Check className="h-4 w-4 text-white" />
                         )}
-                      </Button>
+                      </div>
+                    </button>
 
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleExpanded(index)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <ArrowRight
-                          className={`h-4 w-4 transition-transform ${
-                            expandedItems.has(index) ? 'rotate-90' : ''
-                          }`}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <PriorityIcon
+                          className={`h-5 w-5 ${priority.iconColor}`}
                         />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {improvement.length > 150 && !expandedItems.has(index)
-                      ? `${improvement.substring(0, 150)}...`
-                      : improvement}
-                  </p>
-
-                  <AnimatePresence>
-                    {expandedItems.has(index) && improvement.length > 150 && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="mt-2 pt-2 border-t border-gray-200"
-                      >
-                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                          <Zap className="h-3 w-3" />
-                          <span>
-                            Implementation tip: Focus on specific examples and
-                            quantified results
+                        <Badge
+                          variant="outline"
+                          className={`text-xs font-semibold ${priority.badgeClass}`}
+                        >
+                          {priority.label}
+                        </Badge>
+                        {index < 3 && (
+                          <span className="text-xs text-gray-600 font-medium">
+                            #{index + 1} priority
                           </span>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        )}
+                      </div>
+
+                      <p
+                        className={`text-base leading-relaxed ${
+                          isCompleted
+                            ? 'line-through text-gray-500'
+                            : 'text-gray-900 font-medium'
+                        }`}
+                      >
+                        {improvement}
+                      </p>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(improvement, index)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                    >
+                      {copiedIndex === index ? (
+                        <Check className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <Copy className="h-5 w-5 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
 
-        {/* Missing Keywords Section */}
+        {/* Missing Keywords */}
         {missingKeywords.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg shadow-sm"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <Target className="h-4 w-4 text-blue-600" />
-              <span className="font-medium text-blue-900">
-                Missing Keywords
+            <div className="flex items-center gap-3 mb-4">
+              <Target className="h-5 w-5 text-blue-600" />
+              <span className="text-lg font-semibold text-blue-900">
+                Missing Keywords ({missingKeywords.length})
               </span>
-              <Badge variant="outline" className="text-xs">
-                {missingKeywords.length} keywords
-              </Badge>
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-3">
-              {missingKeywords.slice(0, 8).map((keyword, index) => (
-                <Badge
+            <div className="flex flex-wrap gap-2">
+              {missingKeywords.slice(0, 10).map((keyword, index) => (
+                <motion.div
                   key={index}
-                  variant="outline"
-                  className="bg-white border-blue-300 text-blue-800"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
                 >
-                  {keyword}
-                </Badge>
+                  <Badge
+                    variant="outline"
+                    className="bg-white hover:bg-blue-50 border-blue-300 text-blue-800 cursor-default font-medium shadow-sm"
+                  >
+                    {keyword}
+                  </Badge>
+                </motion.div>
               ))}
-              {missingKeywords.length > 8 && (
+              {missingKeywords.length > 10 && (
                 <Badge
                   variant="outline"
-                  className="bg-white border-blue-300 text-blue-800"
+                  className="bg-white border-blue-300 text-blue-700 font-semibold shadow-sm"
                 >
-                  +{missingKeywords.length - 8} more
+                  +{missingKeywords.length - 10} more
                 </Badge>
               )}
             </div>
 
-            <p className="text-sm text-blue-800">
-              Consider incorporating these keywords naturally into your resume
-              to improve ATS matching.
+            <p className="text-sm text-blue-700 mt-4 flex items-center gap-2 leading-relaxed">
+              <ChevronRight className="h-4 w-4" />
+              Add these naturally to your resume to improve ATS matching
             </p>
           </motion.div>
         )}
 
-        {improvements.length > 0 && (
+        {/* Pro Tip */}
+        {improvements.length > 0 && completedCount < totalCount && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
-            className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg"
+            transition={{ delay: 0.5 }}
+            className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg shadow-sm"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="h-4 w-4 text-gray-600" />
-              <span className="font-medium text-gray-900">Pro Tip</span>
+            <div className="flex items-start gap-3">
+              <Flame className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-purple-900 text-base mb-2">
+                  Quick Win
+                </p>
+                <p className="text-sm text-purple-700 leading-relaxed">
+                  Start with the <strong>Critical</strong> items first. Fixing
+                  just the top 2-3 can boost your score by 10-15 points.
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-gray-700">
-              Focus on high-priority improvements first. Each change can
-              significantly boost your ATS score and improve your chances of
-              getting noticed by recruiters.
-            </p>
           </motion.div>
         )}
+
+        {/* Completion Celebration */}
+        <AnimatePresence>
+          {completedCount === totalCount && totalCount > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="mt-6 p-6 bg-green-50 border border-green-200 rounded-lg text-center shadow-sm"
+            >
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+              <p className="text-lg font-semibold text-green-900 mb-2">
+                All done!
+              </p>
+              <p className="text-sm text-green-700 leading-relaxed">
+                Great work! Update your resume and run analysis again to see
+                improvements.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardContent>
     </Card>
   );

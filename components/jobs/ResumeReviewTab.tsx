@@ -20,22 +20,17 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 
-// Import our Day 9 components
+// Import analysis components
 import { ATSScoreDisplay } from './ATSScoreDisplay';
 import { StrengthsPanel } from './StrengthsPanel';
 import { ImprovementsPanel } from './ImprovementsPanel';
-import { CompanyInsights } from './CompanyInsights';
 import { FileUpload } from '@/components/shared/FileUpload';
 import { ResumePreview } from '@/components/shared/ResumePreview';
 
 // Import stores and utilities
 import { useJobStore } from '@/lib/stores/jobStore';
 import { getFile } from '@/lib/fileStorage';
-import type {
-  Job,
-  ATSAnalysisResult,
-  CompanyInsights as CompanyInsightsType,
-} from '@/types/job';
+import type { Job, ATSAnalysisResult } from '@/types/job';
 import type { FileMetadata } from '@/types/file';
 
 interface ResumeReviewTabProps {
@@ -213,10 +208,10 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
       }
 
       const { data } = await response.json();
-      const { atsResult, companyInsights } = data;
+      const { atsResult } = data;
 
       // Save results
-      saveAnalysisResult(job.id, atsResult, companyInsights);
+      saveAnalysisResult(job.id, atsResult);
 
       setAnalysisStep('complete');
       setAnalysisProgress(100);
@@ -255,8 +250,8 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
       {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Resume Review</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-3xl font-bold text-gray-900">Resume Review</h2>
+          <p className="text-base text-gray-700 mt-2 leading-relaxed">
             Upload your resume and get AI-powered ATS analysis for this position
           </p>
         </div>
@@ -284,10 +279,10 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
       </div>
 
       {/* Upload Section */}
-      <Card>
+      <Card className="shadow-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
+          <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Upload className="h-5 w-5 text-blue-600" />
             Resume Upload
           </CardTitle>
         </CardHeader>
@@ -307,16 +302,18 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
             // Show centered resume preview with consistent UI pattern
             <div className="flex justify-center">
               <div className="w-full max-w-2xl space-y-6">
-                <h3 className="text-lg font-medium">Resume Preview</h3>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Resume Preview
+                </h3>
 
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="font-medium text-green-900">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-base font-semibold text-green-900">
                       Resume uploaded successfully
                     </span>
                   </div>
-                  <p className="text-sm text-green-700 mt-1">
+                  <p className="text-sm text-green-700 mt-1 leading-relaxed">
                     {resumeFile?.name} •{' '}
                     {resumeFile?.size
                       ? `${Math.round(resumeFile.size / 1024)}KB`
@@ -337,24 +334,26 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
       </Card>
 
       {/* Analysis Trigger Section */}
-      <Card>
+      <Card className="shadow-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Play className="h-5 w-5" />
+          <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Play className="h-5 w-5 text-blue-600" />
             ATS Analysis
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600">
+              <p className="text-base text-gray-700 leading-relaxed">
                 Analyze your resume against this job description to get detailed
                 ATS scoring and improvement suggestions.
               </p>
               {!hasResume && (
-                <div className="flex items-center gap-2 mt-2 text-amber-600">
+                <div className="flex items-center gap-2 mt-3 text-yellow-600">
                   <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm">Please upload a resume first</span>
+                  <span className="text-sm font-medium">
+                    Please upload a resume first
+                  </span>
                 </div>
               )}
             </div>
@@ -362,16 +361,17 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
             <Button
               onClick={runAnalysis}
               disabled={!hasResume || isAnalyzing}
-              className="flex items-center gap-2 min-w-[140px]"
+              size="lg"
+              className="flex items-center gap-2 min-w-[160px] shadow-sm hover:shadow-md transition-shadow"
             >
               {isAnalyzing ? (
                 <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <RefreshCw className="h-5 w-5 animate-spin" />
                   Analyzing...
                 </>
               ) : (
                 <>
-                  <Play className="h-4 w-4" />
+                  <Play className="h-5 w-5" />
                   Run Analysis
                 </>
               )}
@@ -385,19 +385,19 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+                className="mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg shadow-sm"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-blue-900">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-base font-semibold text-blue-900">
                     {currentStepText}
                   </span>
-                  <span className="text-sm text-blue-700">
+                  <span className="text-base font-bold text-blue-700">
                     {analysisProgress}%
                   </span>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
+                <div className="w-full bg-blue-200 rounded-full h-2.5 shadow-inner">
                   <motion.div
-                    className="bg-blue-600 h-2 rounded-full"
+                    className="bg-blue-500 h-2.5 rounded-full shadow-sm"
                     initial={{ width: 0 }}
                     animate={{ width: `${analysisProgress}%` }}
                     transition={{ duration: 0.5 }}
@@ -417,40 +417,34 @@ export function ResumeReviewTab({ job }: ResumeReviewTabProps) {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <Separator />
+            <Separator className="my-8" />
 
             {/* ATS Score Display */}
             <ATSScoreDisplay analysis={job.currentAnalysis} />
 
             {/* Strengths and Improvements */}
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-2 gap-8">
               <StrengthsPanel strengths={job.currentAnalysis.strengths} />
               <ImprovementsPanel
                 improvements={job.currentAnalysis.improvements}
                 missingKeywords={job.currentAnalysis.missing_keywords}
               />
             </div>
-
-            {/* Company Insights */}
-            {job.companyInsights && (
-              <CompanyInsights
-                insights={job.companyInsights}
-                companyName={job.company}
-              />
-            )}
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Empty State */}
       {!hasResume && !isAnalyzing && (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <FileText className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <Card className="border-dashed border-2 shadow-sm">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <FileText className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Ready to analyze your resume?
             </h3>
-            <p className="text-gray-600 mb-4 max-w-md">
+            <p className="text-base text-gray-600 mb-4 max-w-md leading-relaxed">
               Upload your resume above and click &quot;Run Analysis&quot; to get
               detailed ATS scoring, strengths analysis, and personalized
               improvement suggestions.

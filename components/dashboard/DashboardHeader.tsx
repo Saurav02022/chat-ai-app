@@ -38,7 +38,7 @@ import {
 const navigationItems = [
   {
     name: 'Dashboard',
-    href: PROTECTED_ROUTES.DASHBOARD,
+    href: '/',
     icon: LayoutDashboard,
   },
   {
@@ -87,6 +87,7 @@ export function DashboardHeader() {
         const Icon = item.icon;
         const isActive =
           pathname === item.href ||
+          (item.href === '/' && pathname === '/') ||
           (item.href === PROTECTED_ROUTES.JOBS && pathname.startsWith('/jobs'));
 
         return (
@@ -118,10 +119,7 @@ export function DashboardHeader() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo and Brand */}
         <div className="flex items-center gap-6">
-          <Link
-            href={PROTECTED_ROUTES.DASHBOARD}
-            className="flex items-center gap-2"
-          >
+          <Link href="/" className="flex items-center gap-2">
             <span className="font-bold">
               JobCraft <Badge variant="secondary">AI</Badge>
             </span>
@@ -180,7 +178,7 @@ export function DashboardHeader() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={PROTECTED_ROUTES.DASHBOARD}>
+                <Link href="/">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   <span>Dashboard</span>
                 </Link>

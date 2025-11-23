@@ -7,7 +7,7 @@ export default function ResumePage() {
     <ComingSoon
       title="Resume Management"
       description="Upload, optimize, and tailor your resume for each job application with AI-powered suggestions."
-      backUrl="/dashboard"
+      backUrl="/"
       backLabel="Back to Dashboard"
       developmentDay={5}
       priority="high"
